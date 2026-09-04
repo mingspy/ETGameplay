@@ -1,0 +1,5 @@
+{"dict": [
+[100, {"_t":"BuffConfig","_id":100,"Name":"减血Buff","Description":"持续减血","IsStackable":1,"MaxStacks":5,"Duration":5,"BuffTypeInt":1,"BuffEffectTypeInt":2,"EffectValue":100}],
+[111, {"_t":"BuffConfig","_id":111,"Name":"减蓝Buff","Description":"一次性减蓝","IsStackable":1,"MaxStacks":5,"Duration":0,"BuffTypeInt":1,"BuffEffectTypeInt":1,"EffectValue":100}],
+[222, {"_t":"BuffConfig","_id":222,"Name":"增血Buff","Description":"持续增血","IsStackable":1,"MaxStacks":3,"Duration":5,"BuffTypeInt":0,"BuffEffectTypeInt":2,"EffectValue":50}]
+]}
