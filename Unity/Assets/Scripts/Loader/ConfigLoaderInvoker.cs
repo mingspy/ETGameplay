@@ -5,6 +5,39 @@ using UnityEngine;
 
 namespace ET
 {
+    public static class ConfigPathSettings
+    {
+        private static readonly List<string> startConfigs = new List<string>()
+        {
+            "StartMachineConfigCategory", 
+            "StartProcessConfigCategory", 
+            "StartSceneConfigCategory", 
+            "StartZoneConfigCategory",
+        };
+        
+        private static readonly List<string> skillConfigs = new List<string>()
+        {
+            "SkillConfigCategory",
+            "BuffConfigCategory", 
+            "ElementMaterialReactionConfigCategory", 
+            "ElementReactionConfigCategory"
+        };
+
+        public static string GetPath(string configName)
+        {
+            if (startConfigs.Contains(configName))
+            {
+                return $"{Options.Instance.StartConfig}/{configName}";
+            }
+            else if (skillConfigs.Contains(configName))
+            {
+                return $"Skill/{configName}";
+            }
+            return configName;
+        }
+        
+    }
+    
     [Invoke]
     public class GetAllConfigBytes: AInvokeHandler<ConfigLoader.GetAllConfigBytes, ETTask<Dictionary<Type, byte[]>>>
     {
@@ -32,24 +65,9 @@ namespace ET
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                List<string> startConfigs = new List<string>()
-                {
-                    "StartMachineConfigCategory", 
-                    "StartProcessConfigCategory", 
-                    "StartSceneConfigCategory", 
-                    "StartZoneConfigCategory",
-                };
                 foreach (Type configType in configTypes)
                 {
-                    string configFilePath;
-                    if (startConfigs.Contains(configType.Name))
-                    {
-                        configFilePath = $"../Config/Excel/{ct}/{Options.Instance.StartConfig}/{configType.Name}.bytes";    
-                    }
-                    else
-                    {
-                        configFilePath = $"../Config/Excel/{ct}/{configType.Name}.bytes";
-                    }
+                    string configFilePath = $"../Config/Excel/{ct}/{ConfigPathSettings.GetPath(configType.Name)}.bytes";
                     output[configType] = File.ReadAllBytes(configFilePath);
                 }
             }
@@ -97,17 +115,8 @@ namespace ET
             };
 
             string configName = args.ConfigName;
-                
-            string configFilePath;
-            if (startConfigs.Contains(configName))
-            {
-                configFilePath = $"../Config/Excel/{ct}/{Options.Instance.StartConfig}/{configName}.bytes";    
-            }
-            else
-            {
-                configFilePath = $"../Config/Excel/{ct}/{configName}.bytes";
-            }
-
+            
+            string configFilePath = $"../Config/Excel/{ct}/{ConfigPathSettings.GetPath(configName)}.bytes";
             await ETTask.CompletedTask;
             return File.ReadAllBytes(configFilePath);
         }

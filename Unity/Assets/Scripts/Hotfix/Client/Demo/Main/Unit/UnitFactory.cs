@@ -34,6 +34,12 @@ namespace ET.Client
 
 	        unit.AddComponent<XunLuoPathComponent>();
 	        
+	        // 测试
+	        var buffComponent = unit.AddComponent<BuffComponent>();
+                    
+	        var skillComponent = unit.AddComponent<SkillComponent>();
+	        var elementalComponent = unit.AddComponent<ElementalComponent>();
+	        
 	        EventSystem.Instance.Publish(unit.Scene(), new AfterUnitCreate() {Unit = unit});
             return unit;
         }

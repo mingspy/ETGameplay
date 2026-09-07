@@ -9,6 +9,7 @@ namespace ET
         [EntitySystem]
         private static void Awake(this SkillComponent self)
         {
+            Log.Info($"SkillComponentSystem Awake, total skills {SkillConfigCategory.Instance.GetAll().Count}");
             self.Unit = self.GetParent<Unit>();
 #if DEF_NPBehave
             self.ActiveTrees = new Dictionary<int, Root>();

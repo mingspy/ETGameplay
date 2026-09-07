@@ -144,7 +144,7 @@ ET框架中的[Proto2CS](../Share/Tool/Proto2CS/Proto2CS.cs)工具是ET框架‌
 ### EntitySystem等自动生成
 #### 示例及过程
 ```csharp
-[ComponentOf(typeof (Unit))]
+    [ComponentOf(typeof (Unit))]
     public class BuffComponent: Entity, IAwake, IUpdate
     {
        
@@ -165,8 +165,9 @@ ET框架中的[Proto2CS](../Share/Tool/Proto2CS/Proto2CS.cs)工具是ET框架‌
 
         }
     }
-
-  // 自动生成代码如下：
+    
+    // 自动生成代码如下：
+    
     public static partial class BuffComponentSystem
     {
         [EntitySystem]
@@ -202,7 +203,7 @@ ET 框架实现上述代码自动生成及注册调用的核心机制主要依�
 在 ET 8.0 及更高版本中，框架引入了 `cn.etetet.sourcegenerator`包，利用 Roslyn 编译器提供的 Source Generator API 在编译期进行代码分析生成。
 
 *   触发机制：
-    开发者在静态部分类（`static partial class`）上标记 `[EntitySystemOf(typeof(BuffComponent))]` 特性。Source Generator 会在编译阶段扫描所有带有此特性的类。
+    开发者在静态部分类（`static partial class`）上标记[EntitySystemOf], 如 `[EntitySystemOf(typeof(BuffComponent))]`。Source Generator 会在编译阶段扫描所有带有此特性的类。
 *   解析过程：
     生成器会查找该静态类中带有 `[EntitySystem]` 标记且方法签名为 `private static void MethodName(this ComponentType self)` 的方法。例如 `Awake` 和 `Update`。
 *   代码注入：
@@ -250,8 +251,7 @@ ET 框架实现上述代码自动生成及注册调用的核心机制主要依�
 
 这种设计使得开发者无需手动编写繁琐的 System 类样板代码，同时也保持了 ECS 架构的高内聚低耦合特性，且避免了传统虚函数调用带来的部分性能开销（通过静态方法调用和代码生成优化）。<br>参考资料<br>[1] [告别重复劳动：ET框架如何用代码生成自动创建System类-CSDN博客 - CSDN博客](https://blog.csdn.net/gitblog_00896/article/details/152433465)<br>[2] [【ET 8.0-8.1版本】ET框架 - C#全栈式网络游戏开发框架（入门篇）_UWA学堂 - UWA学堂](https://edu.uwa4d.com/course-intro/1/542)<br>[3] [unityet框架学习 - 知乎](http://zhuanlan.zhihu.com/p/619325854?eqid=a42c34510005041d00000003648d28ee&utm_id=0)<br>[4] [基于自定义注解和代码生成实现路由框架-华为开发者话题 | 华为开发者联盟 - 华为开发者联盟](https://developer.huawei.com/consumer/cn/forum/topic/0207153170697988820)<br>[5] [高效实战：ET框架UI事件系统与委托交互完整指南-CSDN博客 - CSDN博客](https://blog.csdn.net/gitblog_00460/article/details/156042938)<br>[6] [ET框架UI事件系统实战指南：从委托机制到高效交互的深度解析-CSDN博客 - CSDN博客](https://blog.csdn.net/gitblog_00039/article/details/156042979)<br>[7] [ET8.1框架ECS组件式编程实战：从原理到游戏服务器应用-CSDN博客 - CSDN博客](https://blog.csdn.net/weixin_33834075/article/details/91566983)<br>[8] [游戏战斗框架设计（六）：魔法效果与 Buff——一个 Buff 如何改变角色 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/2051617667589595239)<br>[9] [TEngine--流程（2） - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/1910833946431850281)<br>[10] [【UE5】反射机制 - 类型信息收集与注册（源码剖析） - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/2026686842083221823)<br>[11] [【Unity】认识常用的生命周期函数（Awake、Start、Update...）_草庐IT - it.caolu.xin](https://it.caolu.xin/v/8uqlte/)<br>[12] [Unity中Awake、Start和Update这些函数到底什么时候执行？顺序和用途有什么区别？ - CSDN文库 - 博客](https://wenku.csdn.net/answer/azr9ccf79uad)<br>[13] [ET框架：Unity游戏服务端的工业级架构实践-CSDN博客 - CSDN博客](https://blog.csdn.net/weixin_30431445/article/details/161355813)<br>[14] [ET框架代码生成模板：自定义System类生成规则-CSDN博客 - CSDN博客](https://blog.csdn.net/gitblog_00819/article/details/152204888)<br>[15] [ECS系统入门手记——其三 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/1988986223159706625)<br>[16] [Unity ET框架学习 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/619325854)<br>[17] [C#中Start Update Awake的执行先后顺序 - CSDN文库 - 博客](https://wenku.csdn.net/answer/2t1w0rusr7)<br>[18] [【Unity脚本生命周期深度解析】：C#中Awake、Start、Update执行顺序全揭秘-CSDN博客 - CSDN博客](https://blog.csdn.net/FastCompile/article/details/157213761)<br>[19] [ET 7.2框架学习(2)-CSDN博客 - CSDN博客](https://blog.csdn.net/u013404885/article/details/131257104)<br>[20] [【ET源代码解析1】项目初始化流程 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/1910703524498641597)<br>[21] [【Unity 底层与原理向】07_Script_Execution_Order机制与坑点 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/1962629406137770323)<br>[22] [Unity中生命周期方法详解：Awake、Start、Update与 FixedUpdate - 百家号](https://baijiahao.baidu.com/s?id=1846813385591292278&wfr=spider&for=pc)<br>[23] [ET记录 - 简书 - 简书社区](https://www.jianshu.com/p/ad8e9df17d18)<br>
 
-#### ISourceGenerator
-ET中有很多自动生成的代码，主要依赖于 C# 的 Source Generator（源代码生成器）技术，结合特定的特性（Attribute）标记，在编译阶段自动推断并生成对应的接口类文件，从而避免手动编写重复模板代码。  
+#### ISourceGenerator 示例
 搜索 ISourceGenerator 可以找到相关代码在 ET/Share/Share.SourceGenerator/Generator/ 文件夹下  
 
 | Source Generator 名称                                                                                                    | 功能描述                                                                                                                             | 生成的类示例                                                |
@@ -259,10 +259,11 @@ ET中有很多自动生成的代码，主要依赖于 C# 的 Source Generator（
 | [ETSystemGenerator](../Share/Share.SourceGenerator/Generator/ETSystemGenerator/ETSystemGenerator.cs)                   | 用于自动生成Entity相关的System类，开发者只需定义带有[EntitySystem]特性的静态方法，即可在编译时生成完整的System类文件 用于生成组件相关的System类，支持组件生命周期管理方法（如Awake、Update等）的自动化生成 | ET_Client_LSAnimatorComponent_AwakeSystem |
 | [ETGetComponentGenerator](../Share/Share.SourceGenerator/Generator/ETGetComponentGenerator.cs) | 生成[ComponentOf]属性标签的代码                                                                                                           |  |
 | [ETEntitySerializeFormatterGenerator](../Share/Share.SourceGenerator/Generator/ETEntitySerializeFormatterGenerator.cs) | 生成[MemoryPackable]属性相关代码，如Formatter类                                                                                             | C2R_LoginFormatter、C2G_EnterMapFormatter、等            |
-参考:  [Roslyn 技术解析：如何利用它做代码生成？](https://blog.csdn.net/2501_94611820/article/details/155851773) 、   [聊一聊 C#中有趣的 SourceGenerator生成器](https://zhuanlan.zhihu.com/p/778871873)
+参考: <br> [Roslyn 技术解析：如何利用它做代码生成？](https://blog.csdn.net/2501_94611820/article/details/155851773) <br>  [聊一聊 C#中有趣的 SourceGenerator生成器](https://zhuanlan.zhihu.com/p/778871873)
 
 #### Analyzer
-对于属性[EntitySystemOf], 由[EntitySystemAnalyzer分析代码是否需要生成EntitySystem](../Share/Analyzer/Analyzer/EntitySystemAnalyzer.cs), 其他的Attributes估计类似。
+主要用于代码合法性检查，有部分Analyzer会针对特定类型，注册代码生成，比如：
+- 对于属性[EntitySystemOf], 由[EntitySystemAnalyzer](../Share/Analyzer/Analyzer/EntitySystemAnalyzer.cs)分析代码是否需要生成EntitySystem, 其他的Attributes估计类似。
 
 ### Attributes
 ![Attributes](readme_imgs/Analyser_Attribute.png)
@@ -586,7 +587,7 @@ KCP是一个快速可靠协议，能以比 TCP浪费10%-20%的带宽的代价，
     - MSG:(消息)  调用kChannel.HandleRecv
 
 ## ET启动流程
-![启动流程图片](readme_imgs/00_Start.jpg)  
+![启动流程图片](readme_imgs/00_Start.png)  
 服务端和客户端执行流程大致相同，客户端入口[init.cs](../Unity/Assets/Scripts/Loader/MonoBehaviour/Init.cs)，服务端入口[Program.cs](../DotNet/App/Program.cs)。以客户端为例，主要过程如下：  
 - 创建world单例（调用world.Instance时自动创建)，作为所有单例的管理仓库。
 - 设置配置文件
@@ -627,7 +628,7 @@ KCP是一个快速可靠协议，能以比 TCP浪费10%-20%的带宽的代价，
 
 ## ET登录流程
 参考 [b站 【ET框架 -- 登录流程】 by 和v诺](https://www.bilibili.com/video/BV1Rr26YFED2?vd_source=806cbed30e2817314f6d8f3b290f03e4)  
-![登录导图](readme_imgs/01_Login.jpeg)  
+![登录导图](readme_imgs/01_Login.png)  
  
 ### 客户端登录请求流程
 - 创建登录UI：[AppStartInitFinish_CreateLoginUI](../Unity/Assets/Scripts/HotfixView/Client/Demo/UI/UILogin/AppStartInitFinish_CreateLoginUI.cs) 创建并绑定登录回调
@@ -742,7 +743,7 @@ KCP是一个快速可靠协议，能以比 TCP浪费10%-20%的带宽的代价，
 ## ET状态同步
 ### 进入战斗流程
 概述： 客户端登录完成后，创建进入战斗UI，点击进入时发送进入地图请求给Gate，Gate加载用户信息，并把相关信息转送给Map服务，Map服务控制用户地图加载以及角色创建。
-![进入战斗流程图](readme_imgs/03_StateSync00.jpg)
+![进入战斗流程图](readme_imgs/03_StateSync00.png)
 
 #### 客户端
 - 创建进入战斗UI： [登录](#登录流程)完成后会发布[**LoginFinish**]事件，状态同步处理该事件的Handler是[LoginFinish_CreateLobbyUI](../Unity/Assets/Scripts/HotfixView/Client/Demo/UI/UILobby/LoginFinish_CreateLobbyUI.cs)
@@ -792,7 +793,7 @@ KCP是一个快速可靠协议，能以比 TCP浪费10%-20%的带宽的代价，
 
 #### 服务端
 - Gate [C2G_EnterMapHandler](../Unity/Assets/Scripts/Hotfix/Server/Demo/Gate/C2G_EnterMapHandler.cs)
-  - 在Gate上动态创建一个Map Scene，把Unit从DB中加载放进来，然后传送到真正的Map中，这样登陆跟传送的逻辑就完全一样了
+  - 在Gate上动态创建一个GateMapComponent(应该是一个辅助组件，真正的地图在服务的Map Fiber)，把Unit从DB中加载放进来，然后传送到真正的Map中，这样登陆跟传送的逻辑就完全一样了
     - 创建GateMap Sence
     - sence添加 UnitComponent、 AOIManagerComponent、RoomManagerComponent、MailBoxComponent
   - 使用[服务端UnitFactory.Create](../Unity/Assets/Scripts/Hotfix/Server/Demo/Map/Unit/UnitFactory.cs)创建Unit （实际服务应该从DB中加载用户数据）
@@ -823,7 +824,7 @@ KCP是一个快速可靠协议，能以比 TCP浪费10%-20%的带宽的代价，
     - 解锁location，可以接收发给Unit的消息
 
 ### 角色操控流程
-![操控流程图](readme_imgs/03_StateSync10.jpg)
+![操控流程图](readme_imgs/03_StateSync10.png)
 #### Client
 [OperaComponent](../Unity/Assets/Scripts/HotfixView/Client/Demo/Opera/OperaComponentSystem.cs) 用于角色移动控制
 - 创建 C2M_PathfindingResult 请求
@@ -910,7 +911,7 @@ KCP是一个快速可靠协议，能以比 TCP浪费10%-20%的带宽的代价，
 ## ET帧同步
 
 ### 进入场景流程
-![帧同步进入场景流程图](readme_imgs/04_LockSync01.jpg)
+![帧同步进入场景流程图](readme_imgs/04_LockSync01.png)
 调用流程参考[状态同步](#状态同步)，这里只列出关键的handler  
 #### 客户端
 - 创建UI,绑定登录处理 [LoginFinish] -> [LoginFinish_CreateUILSLobby] ->[UILSLobbyEvent] -> [UILSLobbyComponent.EnterMap] ->[EnterMapHelper.Match]
@@ -988,7 +989,7 @@ KCP是一个快速可靠协议，能以比 TCP浪费10%-20%的带宽的代价，
     - 把StartTime、当前帧、所有玩家信息，发给Gate
 
 ### 帧同步逻辑
-![帧同步逻辑](readme_imgs/04_LockSync10.jpg)  
+![帧同步逻辑](readme_imgs/04_LockSync10.png)  
 
 #### 客户端
 帧同步客户端更新：**[LSClientUpdaterSystem](../Unity/Assets/Scripts/Hotfix/Client/LockStep/LSClientUpdaterSystem.cs)** <a id="lsclientupdatersystem"></a>

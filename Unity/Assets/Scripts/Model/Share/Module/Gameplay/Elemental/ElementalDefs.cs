@@ -3,7 +3,7 @@ namespace ET
     /// <summary>
     /// 元素类型
     /// </summary>
-    public enum ElementType
+    public enum ElementalType
     {
         None = 0,
         Fire,
@@ -231,7 +231,7 @@ namespace ET
     {
         public ReactionType Result;
         public float DamageMultiplier;
-        public ElementType Remain; // 反应后残留的元素，None表示清除
+        public ElementalType Remain; // 反应后残留的元素，None表示清除
         public float GaugeConsumption;      // 消耗的目标元素计量值 (0-1)
         public string VfxName;
         public bool IsConsumed;             // 是否完全消耗目标元素

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace ET
 {
@@ -11,13 +12,17 @@ namespace ET
         {
             self.Unit = self.GetParent<Unit>();
             self.Buffs = new Dictionary<int, BuffInstance>();
+
+            var cnt = BuffConfigCategory.Instance.GetAll().Count;
+            Log.Info($"BuffComponentSystem  Awake, total BuffCount: {cnt} IScene {self.Scene()} {self.Fiber()} AppType {Options.Instance.AppType}");
         }
         
         
         [EntitySystem]
         private static void Update(this BuffComponent self)
         {
-            // 每帧检查过期Buff，TODO:实际项目中建议在定时器或特定Tick中处理
+            // 每帧检查过期Buff，TODO: 后续改成用 TimerComponent 定时器完成。
+            //Log.Info($"BuffComponentSystem  Update, BuffCount: {self.Buffs.Count} IScene {self.Scene()} {self.Fiber()} AppType {Options.Instance.AppType}");
             var now = TimeInfo.Instance.ServerFrameTime();
             var expiredKeys = new List<int>();
             foreach (var kvp in self.Buffs)

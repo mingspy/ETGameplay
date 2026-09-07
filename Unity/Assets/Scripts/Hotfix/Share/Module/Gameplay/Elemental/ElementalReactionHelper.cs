@@ -6,9 +6,9 @@ namespace ET
     /// <summary>
     /// 元素反应管理器Helper类
     /// </summary>
-    public static class ElementReactionHelper
+    public static class ElementalReactionHelper
     {
-        public static bool TryGetElementReaction(ElementType trigger, ElementType aura, out ReactionRule rule)
+        public static bool TryGetElementReaction(ElementalType trigger, ElementalType aura, out ReactionRule rule)
         {
             rule = null;
             int from = (int)trigger;
@@ -23,7 +23,7 @@ namespace ET
             {
                 Result = (ReactionType)config.Reaction,
                 DamageMultiplier = (float)config.DamageMultiplier,
-                Remain = (ElementType)config.RemainElement,
+                Remain = (ElementalType)config.RemainElement,
                 GaugeConsumption = (float)config.GaugeConsumption,
                 VfxName = config.VfxName,
                 IsConsumed = config.IsConsumed != 0,
@@ -36,7 +36,7 @@ namespace ET
         /// <summary>
         /// 获取材质引发的特殊反应
         /// </summary>
-        public static bool TryGetMaterialReaction(ElementType trigger, MaterialType material, out ReactionRule rule)
+        public static bool TryGetMaterialReaction(ElementalType trigger, MaterialType material, out ReactionRule rule)
         {
             rule = null;
             int from = (int)trigger;
@@ -51,7 +51,7 @@ namespace ET
             {
                 Result = (ReactionType)config.Reaction,
                 DamageMultiplier = (float)config.DamageMultiplier,
-                Remain = (ElementType)config.RemainElement,
+                Remain = (ElementalType)config.RemainElement,
                 GaugeConsumption = (float)config.GaugeConsumption,
                 VfxName = config.VfxName,
                 IsConsumed = config.IsConsumed != 0,
