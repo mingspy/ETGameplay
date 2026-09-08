@@ -1,0 +1,9 @@
+{"dict": [
+[1, {"_t":"EquipConfig","_id":1,"Name":"鞋子","Description":"鞋子","EquiqType":1,"Slot":1,"Numerics":[2001],"EffectValues":[100],"BuffCondition":0,"BuffIds":[]}],
+[2, {"_t":"EquipConfig","_id":2,"Name":"帽子","Description":"帽子","EquiqType":2,"Slot":2,"Numerics":[2002],"EffectValues":[100],"BuffCondition":0,"BuffIds":[]}],
+[3, {"_t":"EquipConfig","_id":3,"Name":"武器","Description":"武器","EquiqType":3,"Slot":3,"Numerics":[2001],"EffectValues":[50],"BuffCondition":0,"BuffIds":[]}],
+[4, {"_t":"EquipConfig","_id":4,"Name":"项链","Description":"项链","EquiqType":4,"Slot":4,"Numerics":[2001],"EffectValues":[100],"BuffCondition":0,"BuffIds":[]}],
+[5, {"_t":"EquipConfig","_id":5,"Name":"戒指","Description":"戒指","EquiqType":5,"Slot":5,"Numerics":[2002],"EffectValues":[100],"BuffCondition":0,"BuffIds":[]}],
+[6, {"_t":"EquipConfig","_id":6,"Name":"上衣","Description":"上衣","EquiqType":6,"Slot":6,"Numerics":[2001],"EffectValues":[50],"BuffCondition":0,"BuffIds":[]}],
+[7, {"_t":"EquipConfig","_id":7,"Name":"裤子","Description":"裤子","EquiqType":7,"Slot":7,"Numerics":[2001],"EffectValues":[50],"BuffCondition":0,"BuffIds":[]}]
+]}
