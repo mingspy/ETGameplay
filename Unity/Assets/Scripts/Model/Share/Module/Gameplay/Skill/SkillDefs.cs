@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ET
@@ -25,7 +26,7 @@ namespace ET
     }
     
     // BUFF静态配置
-    public partial class BuffConfig:ETObject
+    public partial class Buff:ETObject
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -44,23 +45,32 @@ namespace ET
         
     }
     
-    public enum BuffType
-    {
-        Gain,   // 增益
-        Debuff, // 减益
-        Control // 控制
-    }
 
     public enum BuffEffectType
     {
-        None,
         ModifyAttribute, // 修改属性
         DamageOverTime,  // 持续伤害
         Stun,            // 眩晕
         Silence          // 沉默
     }
     
-
+    public static class BuffDurationType
+    {
+        public const int Instant = 0; // 立即执行
+        public const int Infinite = 1;  // 永久性的
+        public const int HasDuration = 2; // 有持续时间
+    }
+    
+    [Flags]
+    public enum BuffType
+    {
+        Numeric = 0,  // 默认修改属性
+        Dead = 1 << 1, // 直接死亡
+        Immortal = 1 << 2, // 无敌，不受任何伤害控制和死亡
+        Stun = 1 << 3, // 眩晕
+        Silence = 1<< 4 // 沉默
+        //PersistAfterExpire = 1 << 30, // 过期后保留效果，默认为0，不保留。
+    }
     
     // 运行时技能实例
     public class SkillInstance: ETObject
@@ -80,16 +90,14 @@ namespace ET
         public long CasterId { get; set; } // 施加者
         public float StartTime { get; set; }
         public float EndTime { get; set; }
+        public float PeriodEndTime { get; set; }
         public int Stacks { get; set; } = 1;
-        public double Duration { get; set; }
         
-        //public BuffConfig Config { get; set; } // 引用静态配置
 
-        public bool IsExpired(float currentTime)
-        {
-            if (Duration <= 0) return true; // 瞬时BUFF立即过期
-            return currentTime >= EndTime;
-        }
+        public int [] TotalEffects { get; set; }  // 总伤害，int类型等于原始值，float * 10000
+        
+        public BuffConfig Config { get; set; } // 引用静态配置
+        
     }
     
 }

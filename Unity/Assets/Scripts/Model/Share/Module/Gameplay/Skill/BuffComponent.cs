@@ -15,13 +15,13 @@ namespace ET
     public struct OnBuffAddedEvent
     {
         public Unit Unit;
-        public BuffInstance BuffConfig;
+        public BuffInstance Buff;
     }
     
     public struct OnBuffRemovedEvent
     {
         public Unit Unit;
-        public BuffInstance BuffConfig;
+        public BuffInstance Buff;
     }
 
 }

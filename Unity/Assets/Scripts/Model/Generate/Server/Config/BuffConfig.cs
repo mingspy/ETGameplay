@@ -65,18 +65,20 @@ namespace ET
 		public string Name { get; set; }
 		/// <summary>描述</summary>
 		public string Description { get; set; }
-		/// <summary>是否可叠加,0:否,1:可以</summary>
-		public int IsStackable { get; set; }
 		/// <summary>最多叠加层数</summary>
 		public int MaxStacks { get; set; }
+		/// <summary>持续类型Instant,Infinit,hasDuration</summary>
+		public int DurationType { get; set; }
 		/// <summary>持续时间，0为瞬时</summary>
 		public double Duration { get; set; }
+		/// <summary>周期性, 0为没有</summary>
+		public double Period { get; set; }
 		/// <summary>BuffType</summary>
-		public int BuffTypeInt { get; set; }
-		/// <summary>BuffEffectTypeInt</summary>
-		public int BuffEffectTypeInt { get; set; }
-		/// <summary>效果数值</summary>
-		public double EffectValue { get; set; }
+		public uint BuffType { get; set; }
+		/// <summary>修改的属性</summary>
+		public int[] Numerics { get; set; }
+		/// <summary>效果数值, int 属性等于原来值，float 值 * 10000</summary>
+		public int[] EffectValues { get; set; }
 
 	}
 }

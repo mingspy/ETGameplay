@@ -119,9 +119,10 @@ graph TD
 ## 视频教程
 [ET框架 -- 组件定义与生命周期](https://www.bilibili.com/video/BV1Sn4y1Q7Ne?t=1939.5)  by [和v诺](https://space.bilibili.com/394245976/lists/2952969?type=season)
 
+## ET术语
 
-## ET中的代码生成
-### Proto2CS
+### ET中的代码生成
+#### Proto2CS
 
 ET框架中的[Proto2CS](../Share/Tool/Proto2CS/Proto2CS.cs)工具是ET框架‌自己实现‌的，而不是调用开源的proto2cs工具。
 
@@ -141,8 +142,8 @@ ET框架中的[Proto2CS](../Share/Tool/Proto2CS/Proto2CS.cs)工具是ET框架‌
 | [ClientMessage_C_1000.proto](../Unity/Assets/Config/Proto/ClientMessage_C_1000.proto) |[ClientMessage_C_1000.cs](../Unity/Assets/Scripts/Model/Generate/ClientServer/Message/ClientMessage_C_1000.cs)|
 | [OuterMessage_C_10001.proto](../Unity/Assets/Config/Proto/OuterMessage_C_10001.proto) |[OuterMessage_C_10001.cs](../Unity/Assets/Scripts/Model/Generate/ClientServer/Message/OuterMessage_C_10001.cs)|
 
-### EntitySystem等自动生成
-#### 示例及过程
+#### EntitySystem等自动生成
+##### 示例
 ```csharp
     [ComponentOf(typeof (Unit))]
     public class BuffComponent: Entity, IAwake, IUpdate
@@ -193,7 +194,7 @@ ET框架中的[Proto2CS](../Share/Tool/Proto2CS/Proto2CS.cs)工具是ET框架‌
     }
 ```
 
-
+##### 实现原理
 ET 框架实现上述代码自动生成及注册调用的核心机制主要依赖于 CSource Generator（源代码生成器） 技术，结合 ET 特有的 EntitySystemOf 特性与 EventSystem 事件驱动架构。
 
 以下是具体的实现原理与流程解析：
@@ -215,13 +216,14 @@ ET 框架实现上述代码自动生成及注册调用的核心机制主要依�
 
 2. 系统注册机制：EventSystem
 
+[参考启动流程--CodeTypes.CreateCode()](#register_code_systems)  
 生成的 System 类并不是通过硬编码注册到某个列表中的，而是利用 ET 的 EventSystem（事件系统） 进行自动发现和注册。
 
-*   特性标记：
+*   特性标记：  
     注意生成的代码中保留了 `[EntitySystem]` 特性（或者在旧版本/特定配置下可能依赖类名规范或继承关系，但在 ET 8+ 中通常结合特性或反射扫描）。
-*   启动扫描：
+*   启动扫描： 
     在游戏启动初始化阶段（通常在 `Game.Init` 或 `StartConfig` 加载时），`EventSystem` 会通过反射扫描程序集中所有的类型。
-*   类型识别与注册：
+*   类型识别与注册：  
     `EventSystem` 会识别出所有继承自 `ASystem`（如 `AwakeSystem`, `UpdateSystem` 等）的类。
     *   它会将这些 System 实例化。
     *   根据 System 所关注的组件类型（泛型参数 `T`，即 `BuffComponent`）和方法类型（Awake, Update 等），将其注册到内部的字典或映射表中。
@@ -251,7 +253,7 @@ ET 框架实现上述代码自动生成及注册调用的核心机制主要依�
 
 这种设计使得开发者无需手动编写繁琐的 System 类样板代码，同时也保持了 ECS 架构的高内聚低耦合特性，且避免了传统虚函数调用带来的部分性能开销（通过静态方法调用和代码生成优化）。<br>参考资料<br>[1] [告别重复劳动：ET框架如何用代码生成自动创建System类-CSDN博客 - CSDN博客](https://blog.csdn.net/gitblog_00896/article/details/152433465)<br>[2] [【ET 8.0-8.1版本】ET框架 - C#全栈式网络游戏开发框架（入门篇）_UWA学堂 - UWA学堂](https://edu.uwa4d.com/course-intro/1/542)<br>[3] [unityet框架学习 - 知乎](http://zhuanlan.zhihu.com/p/619325854?eqid=a42c34510005041d00000003648d28ee&utm_id=0)<br>[4] [基于自定义注解和代码生成实现路由框架-华为开发者话题 | 华为开发者联盟 - 华为开发者联盟](https://developer.huawei.com/consumer/cn/forum/topic/0207153170697988820)<br>[5] [高效实战：ET框架UI事件系统与委托交互完整指南-CSDN博客 - CSDN博客](https://blog.csdn.net/gitblog_00460/article/details/156042938)<br>[6] [ET框架UI事件系统实战指南：从委托机制到高效交互的深度解析-CSDN博客 - CSDN博客](https://blog.csdn.net/gitblog_00039/article/details/156042979)<br>[7] [ET8.1框架ECS组件式编程实战：从原理到游戏服务器应用-CSDN博客 - CSDN博客](https://blog.csdn.net/weixin_33834075/article/details/91566983)<br>[8] [游戏战斗框架设计（六）：魔法效果与 Buff——一个 Buff 如何改变角色 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/2051617667589595239)<br>[9] [TEngine--流程（2） - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/1910833946431850281)<br>[10] [【UE5】反射机制 - 类型信息收集与注册（源码剖析） - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/2026686842083221823)<br>[11] [【Unity】认识常用的生命周期函数（Awake、Start、Update...）_草庐IT - it.caolu.xin](https://it.caolu.xin/v/8uqlte/)<br>[12] [Unity中Awake、Start和Update这些函数到底什么时候执行？顺序和用途有什么区别？ - CSDN文库 - 博客](https://wenku.csdn.net/answer/azr9ccf79uad)<br>[13] [ET框架：Unity游戏服务端的工业级架构实践-CSDN博客 - CSDN博客](https://blog.csdn.net/weixin_30431445/article/details/161355813)<br>[14] [ET框架代码生成模板：自定义System类生成规则-CSDN博客 - CSDN博客](https://blog.csdn.net/gitblog_00819/article/details/152204888)<br>[15] [ECS系统入门手记——其三 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/1988986223159706625)<br>[16] [Unity ET框架学习 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/619325854)<br>[17] [C#中Start Update Awake的执行先后顺序 - CSDN文库 - 博客](https://wenku.csdn.net/answer/2t1w0rusr7)<br>[18] [【Unity脚本生命周期深度解析】：C#中Awake、Start、Update执行顺序全揭秘-CSDN博客 - CSDN博客](https://blog.csdn.net/FastCompile/article/details/157213761)<br>[19] [ET 7.2框架学习(2)-CSDN博客 - CSDN博客](https://blog.csdn.net/u013404885/article/details/131257104)<br>[20] [【ET源代码解析1】项目初始化流程 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/1910703524498641597)<br>[21] [【Unity 底层与原理向】07_Script_Execution_Order机制与坑点 - 知乎 - 知乎](https://zhuanlan.zhihu.com/p/1962629406137770323)<br>[22] [Unity中生命周期方法详解：Awake、Start、Update与 FixedUpdate - 百家号](https://baijiahao.baidu.com/s?id=1846813385591292278&wfr=spider&for=pc)<br>[23] [ET记录 - 简书 - 简书社区](https://www.jianshu.com/p/ad8e9df17d18)<br>
 
-#### ISourceGenerator 示例
+##### ISourceGenerator 示例
 搜索 ISourceGenerator 可以找到相关代码在 ET/Share/Share.SourceGenerator/Generator/ 文件夹下  
 
 | Source Generator 名称                                                                                                    | 功能描述                                                                                                                             | 生成的类示例                                                |
@@ -261,12 +263,13 @@ ET 框架实现上述代码自动生成及注册调用的核心机制主要依�
 | [ETEntitySerializeFormatterGenerator](../Share/Share.SourceGenerator/Generator/ETEntitySerializeFormatterGenerator.cs) | 生成[MemoryPackable]属性相关代码，如Formatter类                                                                                             | C2R_LoginFormatter、C2G_EnterMapFormatter、等            |
 参考: <br> [Roslyn 技术解析：如何利用它做代码生成？](https://blog.csdn.net/2501_94611820/article/details/155851773) <br>  [聊一聊 C#中有趣的 SourceGenerator生成器](https://zhuanlan.zhihu.com/p/778871873)
 
-#### Analyzer
+##### Analyzer
 主要用于代码合法性检查，有部分Analyzer会针对特定类型，注册代码生成，比如：
 - 对于属性[EntitySystemOf], 由[EntitySystemAnalyzer](../Share/Analyzer/Analyzer/EntitySystemAnalyzer.cs)分析代码是否需要生成EntitySystem, 其他的Attributes估计类似。
 
-### Attributes
+Analyzer_Attributes
 ![Attributes](readme_imgs/Analyser_Attribute.png)
+
 
 ### SceneType变更
 ET中有很多消息处理器限制使用场景，但是创建的的Fiber只有Main,NetClient,NetInner等几个类型，没有Demo/LockStep等。
@@ -281,7 +284,6 @@ ET中有很多消息处理器限制使用场景，但是创建的的Fiber只有M
     SceneType sceneType = EnumHelper.FromString<SceneType>(globalComponent.GlobalConfig.AppType.ToString());
     root.SceneType = sceneType;
 ```
-## ET术语及部分机制
 ### ECS
 Entity & Componet & System（实体、组件、系统）  
 在 Unity 的 ECS（Entity Component System，实体-组件-系统）架构中，核心设计理念是从“面向对象（OOP）”转向“面向数据（DOD）”。这种转变旨在通过优化内存布局和 CPU 缓存命中率来极大提升性能，特别是在处理海量对象时。
@@ -609,7 +611,7 @@ KCP是一个快速可靠协议，能以比 TCP浪费10%-20%的带宽的代价，
   - 添加单例NetServices
   - 添加单例NavmeshComponent
   - 添加单例LogMsg
-  - 创建需要[reload的code singleton](../Unity/Assets/Scripts/Core/World/Module/Code/CodeTypes.cs)：初始化所有[[code]](../Unity/Assets/Scripts/Core/World/Module/Code/CodeAttribute.cs)，即建立对应事件与回调字典。
+  - <a id="register_code_systems" />[CodeTypes.CreateCode()](../Unity/Assets/Scripts/Core/World/Module/Code/CodeTypes.cs)：初始化所有标记[[code]](../Unity/Assets/Scripts/Core/World/Module/Code/CodeAttribute.cs)的单例，即建立对应事件与回调字典。
     - [EventSystem](../Unity/Assets/Scripts/Core/World/Module/EventSystem/EventSystem.cs)：初始化并注册所有的[Event]、[Invoke]的handler实例。
     - [MessageDispatcher](../Unity/Assets/Scripts/Core/World/Module/Actor/MessageDispatcher.cs)：初始化并注册所有的[MessageHandler]、[MessageLocationHandler]
     - [EntitySystemSingleton](../Unity/Assets/Scripts/Core/Entity/EntitySystemSingleton.cs)：初始化并注册所有的[EntitySystem]

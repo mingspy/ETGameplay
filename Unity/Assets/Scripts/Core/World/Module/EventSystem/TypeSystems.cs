@@ -3,8 +3,15 @@ using System.Collections.Generic;
 
 namespace ET
 {
+    /// <summary>
+    /// 存储所有Type(一般是组件)的system实现，保存在 <see cref="typeSystemsMap"/>
+    /// </summary>
     public class TypeSystems
     {
+        /// <summary>
+        /// 用于存储一个OneType的所有子接口实现,这里的OneType一般为组件。<br />
+        /// 成员<see cref="Map"/>中存的是OneType所有systems的实现，比如 key 是 IUpdateSystem, value 为 List&lt;SystemObject&gt;.
+        /// </summary>
         public class OneTypeSystems
         {
             public OneTypeSystems(int count)

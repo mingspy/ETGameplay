@@ -28,6 +28,7 @@ namespace ET.Client
             
             // 4. 飘字
             ShowDamageText(go.transform.position, args.Damage);
+            await ETTask.CompletedTask;
         }
 
         private void PlayVfx(Vector3 pos, string vfxName)
