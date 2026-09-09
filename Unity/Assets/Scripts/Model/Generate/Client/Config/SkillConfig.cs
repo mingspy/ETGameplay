@@ -65,20 +65,10 @@ namespace ET
 		public string Name { get; set; }
 		/// <summary>技能描述</summary>
 		public string Description { get; set; }
-		/// <summary>冷却</summary>
-		public double CoolDown { get; set; }
-		/// <summary>蓝耗</summary>
-		public int ManaCost { get; set; }
-		/// <summary>前摇时间</summary>
-		public double WindupTime { get; set; }
-		/// <summary>后摇时间</summary>
-		public double RecoveryTime { get; set; }
-		/// <summary>总时间</summary>
-		public double Duration { get; set; }
-		/// <summary>释放时自身增加的buff</summary>
-		public int[] CastBuffs { get; set; }
-		/// <summary>命中时增加的buff</summary>
-		public int[] HitBuffs { get; set; }
+		/// <summary>技能最高等级</summary>
+		public int MaxLevel { get; set; }
+		/// <summary>技能等级配置</summary>
+		public int[] LevelConfigIds { get; set; }
 
 	}
 }

@@ -73,8 +73,6 @@ namespace ET
 		public int[] Numerics { get; set; }
 		/// <summary>效果数值, int 属性等于原来值，float 值 * 10000</summary>
 		public int[] EffectValues { get; set; }
-		/// <summary>Buff触发条件</summary>
-		public int BuffCondition { get; set; }
 		/// <summary>装备的附加效果，如减速，元素</summary>
 		public int[] BuffIds { get; set; }
 

@@ -1,45 +1,9 @@
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 namespace ET
 {
-    /*
-    // 技能静态配置
-    public partial class SkillConfig: ETObject
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public float Cooldown { get; set; }
-        public int ManaCost { get; set; }
-        public float WindupTime { get; set; } // 前摇时间 (秒)
-        public float RecoveryTime { get; set; } // 后摇时间 (秒)
-        /// <summary>
-        /// 命中时施加的Buff ID列表
-        /// </summary>
-        public List<int> HitBuffs { get; set; } = new List<int>();
-        
-        /// <summary>
-        /// 施法时施加自身的Buff ID列表 (如霸体、无敌)
-        /// </summary>
-        public List<int> CastBuffs { get; set; } = new List<int>();
-    }
     
-    // BUFF静态配置
-    public partial class Buff:ETObject
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public BuffType Type { get; set; } // Gain, Debuff, Control
-        public float Duration { get; set; } // 持续时间，0为瞬时
-        public bool IsStackable { get; set; } // 是否可叠加
-        public int MaxStacks { get; set; } // 最大叠加层数
-        public BuffEffectType EffectType { get; set; } // 修改属性、持续伤害、控制等
-        public float EffectValue { get; set; } // 效果数值
-    }
-    */
-    
-
     public partial class Root : ETObject
     {
         
@@ -61,27 +25,20 @@ namespace ET
         public const int HasDuration = 2; // 有持续时间
     }
     
-    [Flags]
-    public enum BuffType
+    public static class BuffType
     {
-        Numeric = 0,  // 默认修改属性
-        Dead = 1 << 1, // 直接死亡
-        Immortal = 1 << 2, // 无敌，不受任何伤害控制和死亡
-        Stun = 1 << 3, // 眩晕
-        Silence = 1<< 4 // 沉默
-        //PersistAfterExpire = 1 << 30, // 过期后保留效果，默认为0，不保留。
+        public const uint Numeric = 0; // 默认修改属性
+        public const uint Passive = 1 << 1; // 被动技能
+        public const uint Active = 1 << 2; // 主动技能
+        public const uint Talent = 1 << 3; // 天赋技能
+        public const uint Equip = 1 << 4;  // 装备
+        public const uint Rune = 1 << 5; // 符文
+        public const uint Dead = 1 << 10; // 直接死亡
+        public const uint Immortal = 1 << 11; // 无敌，不受任何伤害控制和死亡
+        public const uint Stun = 1 << 12; // 眩晕
+        public const uint Silence = 1 << 13; // 沉默
     }
     
-    // 运行时技能实例
-    public class SkillInstance: ETObject
-    {
-        public int SkillId { get; set; }
-        public long CasterId { get; set; } // 施法者ID
-        public long TargetId { get; set; } // 目标ID
-        public float CastTime { get; set; } // 施法时间点
-        public bool IsFinished { get; set; }
-    }
-
     // 运行时BUFF实例
     public class BuffInstance : ETObject
     {
@@ -98,6 +55,103 @@ namespace ET
         
         public BuffConfig Config { get; set; } // 引用静态配置
         
+    }
+    
+    
+    /// <summary>
+    /// 战斗事件类型
+    /// </summary>
+    public enum BattleEventType
+    {
+        OnTakeDamage = 1,    // 受到伤害
+        OnDealDamage = 2,    // 造成伤害
+        OnKill = 3,          // 击杀
+        OnDeath = 4,         // 死亡
+    }
+
+    /// <summary>
+    /// 战斗事件数据
+    /// </summary>
+    public struct BattleEventData
+    {
+        public Unit Attacker;   // 攻击者
+        public Unit Target;     // 受击者
+        public string Note;  // 伤害来源
+        public float TotalDamage;
+        public List<Damage> DamageDetail;
+        public object Arg;    // 其他参数
+    }
+
+    /// <summary>
+    /// 伤害类型
+    /// </summary>
+    public static class DamageType
+    {
+        public const int True = 0, // 真伤
+                Physical = 1, // 物理伤害
+                Magical = 2, // 法术伤害
+                Fire = 3, // 元素伤害 火，属于法术伤害的一种，但是单独拿出来，增加趣味性(如塞尔达传说)
+                Water = 4, // 水
+                Ice = 5,   // 冰
+                Electricity = 6, // 雷 / 电
+                Wind = 7, // 风
+                Earth = 8, // 地 / 土
+                Light = 9, //  光 / 圣
+                Dark = 10; //  暗 / 邪
+        public static bool IsElemental(int damageType)
+        {
+            return damageType >= Fire &&  damageType <= Dark;
+        }
+    }
+
+    public class Damage : ETObject
+    {
+        public int DamageType; // 伤害类型
+        public float Value; // 伤害数值
+        public bool IsCritical; //// 是否暴击
+        public SkillDamageConfig Config;
+    }
+    
+    
+    // 运行时技能实例
+    public class SkillInstance: ETObject
+    {
+        public SkillConfig Config { get; set; }
+        public int Level { get; private set; } // 当前等级
+        public List<SkillDamageConfig> Damages { get; set; }
+        private SkillLevelConfig LevelConfig { get; set; }
+        
+        public float CD { get; private set; }
+        public string SkillName => Config?.Name;
+        public int SkillId => Config?.Id ?? 0;
+        public void SetLevel(int level)
+        {
+            if ( level == Level || level < 1 || level > this.Config.MaxLevel)
+            {
+                return;
+            }
+            
+            Level = level;
+            // 更新Buff
+            // 更新Damage Config
+            LevelConfig = SkillLevelConfigCategory.Instance.Get(this.Config.LevelConfigIds[level - 1]);
+            
+            if (this.Damages == null)
+            {
+                this.Damages = new List<SkillDamageConfig>(LevelConfig.SkillDamageIds.Length);
+            }
+            else
+            {
+                this.Damages.Clear();
+            }
+            
+            foreach (var skillDamageId in LevelConfig.SkillDamageIds)
+            {
+                this.Damages.Add(SkillDamageConfigCategory.Instance.Get(skillDamageId));
+            }
+
+            CD = (float)LevelConfig.CoolDown;
+        }
     }
     
 }

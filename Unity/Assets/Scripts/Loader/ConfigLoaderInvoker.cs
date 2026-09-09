@@ -17,8 +17,10 @@ namespace ET
         
         private static readonly List<string> skillConfigs = new List<string>()
         {
-            "SkillConfigCategory",
-            "BuffConfigCategory", 
+            "BuffConfigCategory",
+            "SkillConfigCategory", 
+            "SkillLevelConfigCategory",
+            "SkillDamageConfigCategory",
             "ElementMaterialReactionConfigCategory", 
             "ElementReactionConfigCategory"
         };

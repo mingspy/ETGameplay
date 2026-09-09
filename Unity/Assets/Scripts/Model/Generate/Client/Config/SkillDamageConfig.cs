@@ -7,28 +7,28 @@ using System.ComponentModel;
 namespace ET
 {
     [Config]
-    public partial class EquipConfigCategory : Singleton<EquipConfigCategory>, IMerge
+    public partial class SkillDamageConfigCategory : Singleton<SkillDamageConfigCategory>, IMerge
     {
         [BsonElement]
         [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfArrays)]
-        private Dictionary<int, EquipConfig> dict = new();
+        private Dictionary<int, SkillDamageConfig> dict = new();
 		
         public void Merge(object o)
         {
-            EquipConfigCategory s = o as EquipConfigCategory;
+            SkillDamageConfigCategory s = o as SkillDamageConfigCategory;
             foreach (var kv in s.dict)
             {
                 this.dict.Add(kv.Key, kv.Value);
             }
         }
 		
-        public EquipConfig Get(int id)
+        public SkillDamageConfig Get(int id)
         {
-            this.dict.TryGetValue(id, out EquipConfig item);
+            this.dict.TryGetValue(id, out SkillDamageConfig item);
 
             if (item == null)
             {
-                throw new Exception($"配置找不到，配置表名: {nameof (EquipConfig)}，配置id: {id}");
+                throw new Exception($"配置找不到，配置表名: {nameof (SkillDamageConfig)}，配置id: {id}");
             }
 
             return item;
@@ -39,12 +39,12 @@ namespace ET
             return this.dict.ContainsKey(id);
         }
 
-        public Dictionary<int, EquipConfig> GetAll()
+        public Dictionary<int, SkillDamageConfig> GetAll()
         {
             return this.dict;
         }
 
-        public EquipConfig GetOne()
+        public SkillDamageConfig GetOne()
         {
             if (this.dict == null || this.dict.Count <= 0)
             {
@@ -57,24 +57,22 @@ namespace ET
         }
     }
 
-	public partial class EquipConfig: ProtoObject, IConfig
+	public partial class SkillDamageConfig: ProtoObject, IConfig
 	{
-		/// <summary>装备ID</summary>
+		/// <summary>ID</summary>
 		public int Id { get; set; }
-		/// <summary>名字</summary>
-		public string Name { get; set; }
 		/// <summary>描述</summary>
 		public string Description { get; set; }
-		/// <summary>类型</summary>
-		public int EquiqType { get; set; }
-		/// <summary>槽位</summary>
-		public int Slot { get; set; }
-		/// <summary>修改的属性</summary>
-		public int[] Numerics { get; set; }
-		/// <summary>效果数值, int 属性等于原来值，float 值 * 10000</summary>
-		public int[] EffectValues { get; set; }
-		/// <summary>装备的附加效果，如减速，元素</summary>
-		public int[] BuffIds { get; set; }
+		/// <summary>伤害类型</summary>
+		public int DamageType { get; set; }
+		/// <summary>Numeric伤害加成比例</summary>
+		public double NumericRatio { get; set; }
+		/// <summary>基础伤害</summary>
+		public double FlatBaseValue { get; set; }
+		/// <summary>是否可暴击,1可以</summary>
+		public int CanCrit { get; set; }
+		/// <summary>吸血比例</summary>
+		public double LifestealRate { get; set; }
 
 	}
 }

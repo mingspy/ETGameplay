@@ -45,8 +45,9 @@ namespace ET
             var config = SkillConfigCategory.Instance.Get(skillId);
             if (config == null) return;
             // 设置CD
-            self.Cooldowns[skillId] = TimeInfo.Instance.ServerFrameTime() + (long)(config.CoolDown * 1000);
 #if DEF_NPBehave
+            self.Cooldowns[skillId] = TimeInfo.Instance.ServerFrameTime() + (long)(config.CoolDown * 1000);
+
             // 创建并启动服务端行为树
 
             var serverTree = SkillBehaviorTreeFactory.CreateSkillTree(config, self.Unit, target);

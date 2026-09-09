@@ -245,4 +245,18 @@ namespace ET
         public float Damage;
         public string ReactionVfxName;
     }
+    
+    /// 
+    /// 元素反应结果数据
+    /// </summary>
+    public struct ReactionResult
+    {
+        public bool Triggered;
+        public ReactionType ReactionType;
+        public float DamageMultiplier;      // 伤害倍率（增幅反应）
+        public float ResistanceReduction;   // 抗性削减（超导等）
+        public float ControlDuration;       // 控制时长（冻结、感电麻痹等）
+        public float ExtraDamage;           // 额外固定伤害（超载等）
+        public ElementalType ConsumedElement; // 被消耗的已有元素
+    }
 }

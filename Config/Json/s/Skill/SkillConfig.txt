@@ -1,5 +1,5 @@
 {"dict": [
-[1001, {"_t":"SkillConfig","_id":1001,"Name":"妲己一技能","Description":"带有强力攻击技能","CoolDown":5,"ManaCost":178,"WindupTime":0.5,"RecoveryTime":0.5,"Duration":1.6,"CastBuffs":[100],"HitBuffs":[]}],
-[1002, {"_t":"SkillConfig","_id":1002,"Name":"妲己二技能","Description":"带有强力攻击技能2","CoolDown":10,"ManaCost":278,"WindupTime":0.5,"RecoveryTime":0.5,"Duration":1.6,"CastBuffs":[],"HitBuffs":[]}],
-[1003, {"_t":"SkillConfig","_id":1003,"Name":"妲己三技能","Description":"带有强力攻击技能3","CoolDown":20,"ManaCost":178,"WindupTime":0.5,"RecoveryTime":0.5,"Duration":1.6,"CastBuffs":[],"HitBuffs":[222]}]
+[1001, {"_t":"SkillConfig","_id":1001,"Name":"妲己一技能","Description":"带有强力攻击技能","MaxLevel":3,"LevelConfigIds":[1,2,3]}],
+[1002, {"_t":"SkillConfig","_id":1002,"Name":"妲己二技能","Description":"带有强力攻击技能2","MaxLevel":3,"LevelConfigIds":[4,5,6]}],
+[1003, {"_t":"SkillConfig","_id":1003,"Name":"妲己三技能","Description":"带有强力攻击技能3","MaxLevel":3,"LevelConfigIds":[7,8,9]}]
 ]}

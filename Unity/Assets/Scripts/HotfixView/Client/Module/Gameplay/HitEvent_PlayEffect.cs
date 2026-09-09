@@ -5,7 +5,7 @@ namespace ET.Client
     /// <summary>
     /// 客户端播放技能打击效果。
     /// </summary>
-    [Event(SceneType.Main)]
+    [Event(SceneType.Current)]
     public class HitEvent_PlayEffect: AEvent<Scene, CombatHitEvent>
     {
         protected override async ETTask Run(Scene scene, CombatHitEvent args)

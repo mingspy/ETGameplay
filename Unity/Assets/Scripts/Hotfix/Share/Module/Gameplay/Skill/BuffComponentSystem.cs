@@ -119,8 +119,7 @@ namespace ET
         {
             var NumericComponent = self.Unit.GetComponent<NumericComponent>();
             // TODO : 根据Buff类型设置状态
-            var buffType = (BuffType)config.BuffType;
-            if (buffType == BuffType.Numeric)
+            if ((config.BuffType & BuffType.Numeric)  == BuffType.Numeric)
             {
                 for (int i = 0; i < config.Numerics.Length; i++)
                 {
@@ -142,8 +141,7 @@ namespace ET
             // TODO : 根据Buff类型移除状态
             var NumericComponent = self.Unit.GetComponent<NumericComponent>();
             var config = instance.Config;
-            var buffType = (BuffType)instance.Config.BuffType;
-            if (buffType == BuffType.Numeric)
+            if ((config.BuffType & BuffType.Numeric)  == BuffType.Numeric)
             {
                 for (int i = 0; i < config.Numerics.Length; i++)
                 {
