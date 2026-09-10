@@ -7,10 +7,10 @@ namespace ET
     [ComponentOf(typeof(Unit))]
     public class EquipComponent : Entity, IAwake
     {
+        public Dictionary<int, EquipConfig> Equips = new(); // 装备槽位->装备配置
+
         [MemoryPackIgnore]
         [BsonIgnore]
         public Unit Unit { get; set; }
-
-        public Dictionary<int, EquipConfig> Equips = new(); // 装备槽位->装备配置
     }
 }

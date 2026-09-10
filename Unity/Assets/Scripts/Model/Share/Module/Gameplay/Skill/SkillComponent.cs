@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace ET
 {
     /// <summary>
-    /// 负责技能的释放和管理
+    ///     负责技能的释放和管理
     /// </summary>
     [ComponentOf(typeof(Unit))]
     public class SkillComponent : Entity, IAwake

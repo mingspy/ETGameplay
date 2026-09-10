@@ -1,4 +1,7 @@
-namespace ET;
+namespace ET
+{
+    
+
 
 public static class TimeHelper
 {
@@ -68,4 +71,6 @@ public static class TimeHelper
     {
         return (long)(seconds * OneSecond);
     }
+}
+
 }

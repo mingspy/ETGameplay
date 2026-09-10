@@ -1,4 +1,7 @@
-﻿namespace ET;
+﻿namespace ET
+{
+    
+
 
 // 这个可弄个配置表生成
 public static class NumericTypeSuffix
@@ -161,10 +164,10 @@ public static class NumericType
     public const int CritChance = 1501;
 
     /// <summary>
-    ///     暴击伤害加成比例(float类型) finalDamage  = Damage * ( 1 + CritDamage) <br />
+    ///     暴击伤害加成比例(float类型) finalDamage  = Damage * ( 1 + CritDamagePct) <br />
     ///     Critical Strike Damage:决定了触发暴击后，最终伤害在基础值上的‌倍率加成‌，作用是拉高单次攻击的爆发力。暴伤越高，暴击跳字的爽感越强，满足喜欢赌高爆发、追求秒人快感的玩家偏好。
     /// </summary>
-    public const int CritDamage = 1502;
+    public const int CritDamagePct = 1502;
 
     /// <summary>
     ///     吸血(float)
@@ -196,4 +199,6 @@ public static class NumericType
 
     //最大等级
     public const int MaxLevel = 2999;
+}
+
 }
