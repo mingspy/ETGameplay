@@ -1,29 +1,73 @@
+using System;
+
 namespace ET
 {
+    /*
+       | 原始英文 | 推荐中文译名 | 代码枚举建议 (PascalCase) | 命名优化/别名建议 | 备注 |
+       | --- | --- | --- | --- | --- |
+       | Fire | 火 / 烈焰 | Fire | Flame, Pyro | "Pyro" 常用于技能前缀或职业分类 |
+       | Water | 水 / 流水 | Water | Hydro, Aqua | "Hydro" 更具魔法感，常见于元素反应体系 |
+       | Ice | 冰 / 寒冰 | Ice | Frost, Cryo | "Frost" 侧重寒冷状态，"Cryo" 侧重冰冻机制 |
+       | Electricity | 雷 / 电 | Lightning | Thunder, Electro, Volt | 建议修改：Electricity 过于物理化。MOBA中常用 Lightning (闪电) 或 Thunder (雷霆)。"Electro" 常见于二次元 RPG。 |
+       | Wind | 风 / 疾风 | Wind | Anemo, Gale, Air | "Anemo" 是特定游戏术语，通用推荐 Wind 或 Gale (狂风) |
+       | Earth | 地 / 土 | Earth | Geo, Terra, Stone | "Geo" 侧重岩元素，"Terra" 更具古老魔法感 |
+       | Light | 光 / 圣 | Light | Holy, Radiant, Lux | RPG中若涉及神职，常用 Holy (神圣)；MOBA中常用 Light |
+       | Dark | 暗 / 邪 | Dark | Shadow, Void, Necro | RPG中若涉及亡灵/邪恶，常用 Shadow (暗影) 或 Necro (死灵) |
+       | Poison | 毒 / 毒素 | Poison | Toxin, Venom, Bio | "Toxin" 侧重化学/自然毒，"Venom" 侧重生物毒液，"Bio" 侧重生化科幻 |
+       
+       | 新增元素英文 | 推荐中文译名 | 代码枚举建议 | 典型应用场景/机制 |
+       | --- | --- | --- | --- |
+       | Nature | 自然 / 木 | Nature | 治疗、缠绕、生长；常与火形成燃烧反应，与水形成滋养 |
+       | Arcane | 奥术 / 秘法 | Arcane | 纯魔法伤害、穿透护盾、沉默；代表纯粹的能量 |
+       | Physical | 物理 / 普攻 | Physical | 非元素伤害，用于区分魔法抗性 vs 物理防御 |
+       | Chaos | 混沌 / 乱 | Chaos | 随机效果、混乱状态、真实伤害；常用于高阶 Boss 或特殊职业 |
+       | Time | 时间 / 时 | Time | 减速、加速、回溯、停滞；高阶控制类元素 |
+       | Space | 空间 / 空 | Space | 传送、位移、切割、维度打击；高机动性或爆发伤害 |
+       | Blood | 血 / 鲜血 | Blood | 吸血、献祭、狂战士机制；以生命值换取力量 |
+       | Sound | 音 / 声 | Sound | 眩晕、沉默、范围干扰；较少见但具有独特控制效果 |
+       | Metal | 金 / 铁 | Metal | 破甲、磁吸、反射；常与雷形成导电或磁化反应 |
+       | Mist | 雾 / 幻 | Mist | 隐身、闪避提升、致盲；辅助或刺客类元素 |
+     */
     /// <summary>
     /// 元素类型
     /// </summary>
     public enum ElementalType
     {
         None = 0,
-        Fire,
-        Water,
-        Ice,
-        Electricity, // 雷 / 电
-        Wind,
-        Earth,  // 地 / 土
-        Light,  //  光 / 圣
-        Dark  //  暗 / 邪
+        // --- 基础自然元素 ---
+        Fire ,   // 火
+        Water ,   // 水
+        Ice  ,   // 冰
+        Lightning ,   // 雷 (替代 Electricity)
+        Wind,   // 风
+        Earth ,   // 地
+        // --- 对立/概念元素 ---
+        Light ,   // 光 (或 Holy)
+        Dark ,   // 暗 (或 Shadow)
+        Nature ,   // 自然 (木)
+        Poison ,   // 毒 (或 Toxin)
+
+        // --- 高阶/特殊元素 ---
+        Chaos   ,  // 混沌
+        Time   ,  // 时间
+        Space ,  // 空间
+    
+        // --- 复合/衍生元素 (可选，也可通过逻辑计算得出) ---
+        Magma, //       = Fire | Earth,     // 岩浆
+        Storm, //       = Wind | Lightning, // 风暴
+        Mist, //        = Water | Wind,     // 雾
+        Blood, //       = Water | Dark,     // 鲜血 (示例)
     }
 
 
     /// <summary>
     /// 元素反应类型
     /// </summary>
+    [Flags]
     public enum ReactionType
     {
         None = 0,
-        Vaporize,   // 蒸发 (火+水)
+        Vaporize,   // 蒸发 (火+水)  
         Melt,       // 融化 (火+冰)
         Overload,   // 超载 (火+雷)
         Superconduct, // 超导 (冰+雷)
@@ -31,9 +75,13 @@ namespace ET
         Frozen,     // 冻结 (水+冰)
         Shatter,    // 碎冰 (冻结+物理/重击)
         Swirl,      // 扩散 (风+其他)
-        Crystallize, // 结晶 (岩+其他)
-        Burning,    // 燃烧 (火+草/油)
-        Conductive  // 传导 (雷+金属)
+        Crystallize , // 结晶 (岩+其他)
+        Burning ,    // 燃烧 (火+草/油)
+        Conductive ,  // 传导 (雷+金属)
+        ChangeMaterial = 1 << 8,  // 标记区域
+        ChangeSurfaceMaterial = 1 << 9,
+        ElementConsumption = 1 << 10,
+        MASK = 0xFF // 前面8位用于表示反应结果，256种足够用了。后面位标记位。
     }
     
 
@@ -46,7 +94,7 @@ namespace ET
         /// <summary>
         /// 未定义 / 默认
         /// </summary>
-        Undefined = 0,
+        None = 0,
 
         /// <summary>
         /// 泥土：可燃性低，易附着湿润，绝缘
@@ -225,17 +273,19 @@ namespace ET
     }
     
     /// <summary>
-    /// 元素反应数据
+    /// 元素反应规则数据
     /// </summary>
-    public class ReactionRule : ETObject
+    public class ReactionRule: ETObject
     {
-        public ReactionType Result;
-        public float DamageMultiplier;
-        public ElementalType Remain; // 反应后残留的元素，None表示清除
-        public float GaugeConsumption;      // 消耗的目标元素计量值 (0-1)
-        public string VfxName;
-        public bool IsConsumed;             // 是否完全消耗目标元素
-        public int[] ApplyBuffs;
+        public ReactionType Result; // 反应结果，火烧木头为例，产生结果是持续燃烧，直到木头烧完。结果会挂在材质表面。
+        public double DamageMultiplier;  // 伤害放大系数，只针对元素伤害放大, > 1 为放大， < 1 为减少伤害。
+        //  反应强度，0不发生反应， 一般Intensity 设置1。
+        // 攻击者不消耗元素量，反应结果是, 被攻击者元素销量 和产生的伤害都是 Min(攻击者元素量 * Intensity, 被攻击者元素销量)。
+        public double Intensity; 
+        public int DaceyPerSecond;    // 反应后剩余元素每秒消耗量, 0不消耗。比如火点燃了木头，后续持续消耗剩余的木头。
+        public int Duration;         // 反应后附加元素的持续时间，单位毫秒。如果一直燃烧，直到结束，设置一个较大值。
+        public int[] ApplyBuffs;  // 反应后附加的BUFF，比如持续伤害，持续周边AOE，持续蔓延。
+        public string VfxName;       // 反应产生的视觉效果vfx名称
     }
     
     public struct CombatHitEvent
@@ -258,5 +308,24 @@ namespace ET
         public float ControlDuration;       // 控制时长（冻结、感电麻痹等）
         public float ExtraDamage;           // 额外固定伤害（超载等）
         public ElementalType ConsumedElement; // 被消耗的已有元素
+    }
+    
+    
+    /// <summary>
+    /// 元素附着信息
+    /// </summary>
+    public class ElementalAttachment: ETObject
+    {
+        public long SourceId;    // 附着来源（技能/装备/单位）
+        public MaterialType Material;
+        public ElementalType ElementalType;
+        public ReactionType ReactionResult;
+        public int Gauge;  // 元素残留数量
+        public double Intensity;  // 反应强度
+        public int DecayPerSecond; // 每秒消耗
+        public long LastUpdateTime;
+        public long EndTime;    // 结束时间
+        public long ReactionEndTime; // 反应结束时间
+        public ReactionRule ReactionRule; // 反应规则
     }
 }

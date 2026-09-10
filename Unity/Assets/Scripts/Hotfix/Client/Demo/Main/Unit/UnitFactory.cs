@@ -38,7 +38,7 @@ namespace ET.Client
 	        var buffComponent = unit.AddComponent<BuffComponent>();
                     
 	        var skillComponent = unit.AddComponent<SkillComponent>();
-	        var elementalComponent = unit.AddComponent<ElementalComponent>();
+	        var elementalComponent = unit.AddComponent<ElementalComponent, MaterialType>(MaterialType.Cloth);
 	        
 	        EventSystem.Instance.Publish(unit.Scene(), new AfterUnitCreate() {Unit = unit});
             return unit;

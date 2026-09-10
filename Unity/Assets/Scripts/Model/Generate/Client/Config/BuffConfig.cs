@@ -67,12 +67,12 @@ namespace ET
 		public string Description { get; set; }
 		/// <summary>最多叠加层数</summary>
 		public int MaxStacks { get; set; }
-		/// <summary>持续类型Instant,Infinit,hasDuration</summary>
+		/// <summary>持续类型0:Instant,1:Infinit,2:hasDuration</summary>
 		public int DurationType { get; set; }
-		/// <summary>持续时间，0为瞬时</summary>
-		public double Duration { get; set; }
-		/// <summary>周期性, 0为没有</summary>
-		public double Period { get; set; }
+		/// <summary>持续时间 单位毫秒</summary>
+		public int Duration { get; set; }
+		/// <summary>周期性, 0为没有，单位毫秒</summary>
+		public int Period { get; set; }
 		/// <summary>BuffType</summary>
 		public uint BuffType { get; set; }
 		/// <summary>修改的属性</summary>

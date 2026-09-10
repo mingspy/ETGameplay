@@ -44,7 +44,7 @@ namespace ET.Server
             var buffComponent = unit.AddComponent<BuffComponent>();
                     
             var skillComponent = unit.AddComponent<SkillComponent>();
-            var elementalComponent = unit.AddComponent<ElementalComponent>();
+            var elementalComponent = unit.AddComponent<ElementalComponent, MaterialType>(MaterialType.Cloth);
 
             // 解锁location，可以接收发给Unit的消息
             await scene.Root().GetComponent<LocationProxyComponent>().UnLock(LocationType.Unit, unit.Id, request.OldActorId, unit.GetActorId());

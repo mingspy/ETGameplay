@@ -45,9 +45,13 @@ namespace ET
         public int BuffId { get; set; }
         public long OwnerId { get; set; } // BUFF持有者
         public long CasterId { get; set; } // 施加者
-        public float StartTime { get; set; }
-        public float EndTime { get; set; }
-        public float PeriodEndTime { get; set; }
+        
+        /// <summary>
+        /// 开始时间，单位毫秒数，以下都为毫秒。
+        /// </summary>
+        public long StartTime { get; set; }
+        public long EndTime { get; set; }
+        public long PeriodEndTime { get; set; }
         public int Stacks { get; set; } = 1;
         
 

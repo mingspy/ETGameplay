@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-
+using MemoryPack;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace ET
 {
@@ -9,6 +10,8 @@ namespace ET
     [ComponentOf(typeof (Unit))]
     public class SkillComponent: Entity, IAwake
     {
+        [MemoryPackIgnore]
+        [BsonIgnore]
         public Unit Unit  { get; set; }
 
         public Dictionary<int, long> Cooldowns { get; set; }

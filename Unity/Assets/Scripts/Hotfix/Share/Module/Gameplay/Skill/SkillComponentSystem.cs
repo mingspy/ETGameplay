@@ -22,7 +22,7 @@ namespace ET
             // 1. 检查CD
             if (self.Cooldowns.TryGetValue(skillId, out var cdEnd))
             {
-                if (TimeInfo.Instance.ServerFrameTime() < cdEnd) return false;
+                if (TimeHelper.Now() < cdEnd) return false;
             }
             
             // 2. 检查Buff限制 (例如: 沉默状态下不可施法)
@@ -46,7 +46,7 @@ namespace ET
             if (config == null) return;
             // 设置CD
 #if DEF_NPBehave
-            self.Cooldowns[skillId] = TimeInfo.Instance.ServerFrameTime() + (long)(config.CoolDown * 1000);
+            self.Cooldowns[skillId] = TimeHelper.Now() + TimeHelper.ToMS(config.CoolDown);
 
             // 创建并启动服务端行为树
 

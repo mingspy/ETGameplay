@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using MemoryPack;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace ET
 {
@@ -8,8 +10,12 @@ namespace ET
     [ComponentOf(typeof (Unit))]
     public class BuffComponent: Entity, IAwake, IUpdate
     {
-        public Dictionary<int, BuffInstance> Buffs { get; set; }
+        [MemoryPackIgnore]
+        [BsonIgnore]
         public Unit Unit { get; set; }
+        
+        public Dictionary<int, BuffInstance> Buffs { get; set; }
+
     }
     
     public struct OnBuffAddedEvent

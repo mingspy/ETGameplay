@@ -48,7 +48,11 @@ namespace ET
             return dt.AddTicks(timeStamp * 10000);
         }
         
-        // 线程安全
+        /// <summary>
+        /// 返回客户端时间，单位毫秒。<br/>
+        /// 在 C# 中，DateTime.Ticks 的一个刻度（Tick）代表 100 纳秒‌（即 10^7), 1 毫秒 = 10^4。所以
+        /// </summary>
+        /// <returns></returns>
         public long ClientNow()
         {
             return (DateTime.UtcNow.Ticks - this.dt1970.Ticks) / 10000;

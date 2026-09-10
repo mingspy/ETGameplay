@@ -24,7 +24,7 @@ namespace ET.Server
                     var buffComponent = unit.AddComponent<BuffComponent>();
                     
                     var skillComponent = unit.AddComponent<SkillComponent>();
-                    var elementalComponent = unit.AddComponent<ElementalComponent>();
+                    var elementalComponent = unit.AddComponent<ElementalComponent, MaterialType>(MaterialType.Cloth);
                     
                     unitComponent.Add(unit);
                     // 加入aoi

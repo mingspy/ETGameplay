@@ -1,7 +1,7 @@
 {"dict": [
-[100, {"_t":"BuffConfig","_id":100,"Name":"减血Buff","Description":"持续减血","MaxStacks":5,"DurationType":2,"Duration":5,"Period":0,"BuffType":0,"Numerics":[1001],"EffectValues":[-100]}],
+[100, {"_t":"BuffConfig","_id":100,"Name":"减血Buff","Description":"持续减血","MaxStacks":5,"DurationType":2,"Duration":5000,"Period":0,"BuffType":0,"Numerics":[1001],"EffectValues":[-100]}],
 [111, {"_t":"BuffConfig","_id":111,"Name":"减蓝Buff","Description":"一次性减蓝","MaxStacks":5,"DurationType":0,"Duration":0,"Period":0,"BuffType":0,"Numerics":[1002],"EffectValues":[100]}],
-[222, {"_t":"BuffConfig","_id":222,"Name":"增血Buff","Description":"持续增血","MaxStacks":3,"DurationType":2,"Duration":5,"Period":0,"BuffType":0,"Numerics":[1001],"EffectValues":[50]}],
-[3, {"_t":"BuffConfig","_id":3,"Name":"眩晕","Description":"眩晕3秒","MaxStacks":1,"DurationType":2,"Duration":3,"Period":0,"BuffType":8,"Numerics":[],"EffectValues":[]}],
-[2, {"_t":"BuffConfig","_id":2,"Name":"无敌","Description":"无敌1秒","MaxStacks":1,"DurationType":2,"Duration":2,"Period":0,"BuffType":4,"Numerics":[],"EffectValues":[]}]
+[222, {"_t":"BuffConfig","_id":222,"Name":"增血Buff","Description":"持续增血","MaxStacks":3,"DurationType":2,"Duration":5000,"Period":0,"BuffType":0,"Numerics":[1001],"EffectValues":[50]}],
+[3, {"_t":"BuffConfig","_id":3,"Name":"眩晕","Description":"眩晕3秒","MaxStacks":1,"DurationType":2,"Duration":3000,"Period":0,"BuffType":8,"Numerics":[],"EffectValues":[]}],
+[2, {"_t":"BuffConfig","_id":2,"Name":"无敌","Description":"无敌1秒","MaxStacks":1,"DurationType":2,"Duration":2000,"Period":0,"BuffType":4,"Numerics":[],"EffectValues":[]}]
 ]}

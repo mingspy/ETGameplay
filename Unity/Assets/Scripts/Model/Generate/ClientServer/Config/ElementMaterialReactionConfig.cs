@@ -64,23 +64,23 @@ namespace ET
 		/// <summary>描述</summary>
 		public string Description { get; set; }
 		/// <summary>元素类型</summary>
-		public int Element { get; set; }
+		public int FromElement { get; set; }
 		/// <summary>材质类型</summary>
-		public int Material { get; set; }
-		/// <summary>反应结果</summary>
+		public int ToMaterial { get; set; }
+		/// <summary>反应结果，火烧木头为例，产生结果是持续燃烧，直到木头烧完。结果会挂在材质表面。</summary>
 		public int Reaction { get; set; }
-		/// <summary>伤害加成</summary>
+		/// <summary>伤害放大系数，只针对元素伤害放大, > 1 为放大， < 1 为减少伤害。</summary>
 		public double DamageMultiplier { get; set; }
-		/// <summary>反应后状态</summary>
-		public int RemainElement { get; set; }
-		/// <summary>元素计量消耗(%)</summary>
-		public double GaugeConsumption { get; set; }
+		/// <summary>反应强度，0不发生反应， 一般Intensity 设置1。 攻击者不消耗元素量，反应结果是, 被攻击者元素销量 和产生的伤害都是 Min(攻击者元素量 * Intensity, 被攻击者元素销量)</summary>
+		public double Intensity { get; set; }
+		/// <summary>反应后剩余元素每秒消耗量, 0不消耗。比如火点燃了木头，后续持续消耗剩余的木头。</summary>
+		public int DaceyPerSecond { get; set; }
+		/// <summary>反应后附加元素的持续时间，单位毫秒。如果一直燃烧，直到结束，设置一个较大值。</summary>
+		public int Duration { get; set; }
+		/// <summary>反应后附加的BUFF，比如持续伤害，持续周边AOE，持续蔓延。</summary>
+		public int[] ApplyBuffs { get; set; }
 		/// <summary>VFX效果名称</summary>
 		public string VfxName { get; set; }
-		/// <summary>是否完全消耗元素</summary>
-		public int IsConsumed { get; set; }
-		/// <summary>目标施加BuffID</summary>
-		public int[] ApplyBuffs { get; set; }
 
 	}
 }

@@ -22,7 +22,7 @@ namespace ET
         private static void Update(this BuffComponent self)
         {
             // 每帧检查过期Buff，TODO: 后续改成用 TimerComponent 定时器完成。
-            var now = TimeInfo.Instance.ServerFrameTime();
+            long now = TimeHelper.Now();
             var expiredKeys = new List<int>();
             foreach (var kvp in self.Buffs)
             {
@@ -31,7 +31,7 @@ namespace ET
                 if (config.Period > 0 && now >= kvp.Value.PeriodEndTime)
                 {
                     self.ApplyBuffEffect(config, 1, kvp.Value);
-                    kvp.Value.PeriodEndTime = now + (float)config.Period;
+                    kvp.Value.PeriodEndTime = now + TimeHelper.ToMS(config.Period);
                 }
                 
                 // 检查过期
@@ -51,7 +51,7 @@ namespace ET
         {
             if (self.Buffs.TryGetValue(buffId, out var info))
             {
-                if (TimeInfo.Instance.ServerFrameTime() < info.EndTime) return true;
+                if (TimeHelper.Now() < info.EndTime) return true;
                 // 过期移除
                 self.Buffs.Remove(buffId);
             }
@@ -67,7 +67,7 @@ namespace ET
                 return;
             }
             
-            var now = TimeInfo.Instance.ServerFrameTime();
+            var now = TimeHelper.Now();
             int buffId = config.Id;
             if (self.Buffs.TryGetValue(buffId, out var info))
             {
@@ -79,7 +79,7 @@ namespace ET
                 }
                 else
                 {
-                    info.EndTime = now + (float)config.Duration; 
+                    info.EndTime = now + TimeHelper.ToMS(config.Duration); 
                 }
             }
             else
@@ -92,8 +92,8 @@ namespace ET
                     CasterId = casterId,
                     Stacks = stack,
                     StartTime = now,
-                    EndTime = now + (float)config.Duration,
-                    PeriodEndTime = now + (float)config.Duration,
+                    EndTime = now + TimeHelper.ToMS(config.Duration ),
+                    PeriodEndTime = now + TimeHelper.ToMS(config.Duration),
                     TotalEffects = new int [config.Numerics.Length],
                     Config = config
                 };
