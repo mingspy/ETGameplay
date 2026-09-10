@@ -76,9 +76,12 @@ public static class DamageHelper
 
         // 2. TODO: 计算元素伤害，只有简单的元素反应和相克，最终结果是时加成、减收益或者挂BUFF。
         // 反应结果应用到双方，元素本身不消耗，只改变。
+        float elementExtraDamage = 0;
         if (DamageType.IsElemental(damageConfig.DamageType))
         {
-            finalDamage *= ApplyElementalReactions(attacker, target, damageConfig);
+            ReactionResult result = CheckElementalReaction(attacker, target, damageConfig);
+            finalDamage *= result.DamageMultiplier;
+            elementExtraDamage = result.ExtraDamage;
         }
 
         // 3. 暴击判定 (真伤无暴击，且仅当允许暴击时)
@@ -102,13 +105,16 @@ public static class DamageHelper
         }
 
         finalDamage *= mitigationFactor;
-        
+
         // TODO: 应用全局伤害buff，需要时采用下面方案2即可。
         // 目前为止计算都没考虑角色身上的全局增伤BUFF。Numeric组件每个属性虽然有FinalAdd和FinalPct，但是都是针对基础属性的。
         // 1. 简单做法是把全局增伤BUFF直接加到所有属性上，那么前面获取Numeric属性时附带了，但是不优雅。
         // 2. 同样利用Numeric组件，增加一个全局增伤组件 (finalDamage + finalAdd) * (1 + finalPct)
 
-        finalDamage = Math.Max(finalDamage, 0);
+        finalDamage += elementExtraDamage; // 加上元素额外伤害不参与穿透和防御计算，直接附加。
+
+        finalDamage = Math.Max(finalDamage, 0); // 防止负伤害，即造成回血效果。比如元素克制反而回血，后期打不动。
+
         return new Damage()
         {
             DamageType = damageConfig.DamageType, Value = finalDamage, IsCritical = isCrit, Config = damageConfig
@@ -143,9 +149,25 @@ public static class DamageHelper
         return C / (C + defense);
     }
 
-    private static float ApplyElementalReactions(Unit attacker, Unit target, SkillDamageConfig damageConfig)
+    /// <summary>
+    ///     计算元素伤害
+    /// </summary>
+    /// <param name="attacker"></param>
+    /// <param name="target"></param>
+    /// <param name="damageConfig"></param>
+    /// <returns>返回伤害加成</returns>
+    /// <exception cref="NotImplementedException"></exception>
+    private static ReactionResult CheckElementalReaction(Unit attacker, Unit target, SkillDamageConfig damageConfig)
     {
-        throw new NotImplementedException();
+        ReactionResult result = new() { DamageMultiplier = 1.0f };
+        ElementalComponent targetElement = target.GetComponent<ElementalComponent>();
+        if (targetElement != null)
+        {
+            targetElement.CheckAndTriggerReaction(attacker, DamageType.ToElementalType(damageConfig.DamageType), (float)damageConfig.FlatBaseValue,
+                ref result);
+        }
+
+        return result;
     }
 
     public static void ApplyDamage(BattleEventData eventData)
@@ -160,7 +182,6 @@ public static class DamageHelper
         // TODO: 服务端计算结果，客户端接受结果。（当前玩家可以先预测再回滚， UI效果不用回滚 )
         EventSystem.Instance.Publish(eventData.Attacker.Scene(), eventData);
     }
-    
 
     #endregion
 

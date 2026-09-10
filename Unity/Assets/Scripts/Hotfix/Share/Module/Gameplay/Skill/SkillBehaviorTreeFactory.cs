@@ -1,12 +1,9 @@
-namespace ET
+namespace ET;
+
+public static class SkillBehaviorTreeFactory
 {
-
-
-    public static class SkillBehaviorTreeFactory
+    public static Root CreateSkillTree(SkillConfig config, Unit caster, Unit target)
     {
-
-        public static Root CreateSkillTree(SkillConfig config, Unit caster, Unit target)
-        {
 #if DEF_NPBehave
             var blackboard = new Blackboard();
             blackboard.Set("Caster", caster);
@@ -25,9 +22,6 @@ namespace ET
             var sequence = new Sequence(windup, executeDamage, recovery);
             return new Root(sequence, blackboard: blackboard);
 #endif
-            return null;
-        }
-
-    } 
+        return null;
+    }
 }
-

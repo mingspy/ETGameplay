@@ -1,9 +1,6 @@
-
-
 namespace ET
 {
 #if DEF_NPBehave
-    
 using NPBehave;
 
     public class SkillDamageAction : Action

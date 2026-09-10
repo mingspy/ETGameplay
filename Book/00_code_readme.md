@@ -117,8 +117,8 @@ graph TD
 2.  热更：只有不依赖 Unity 的代码（Model/Hotfix）才能方便地进行 DLL 热更新。
 3.  复用：服务端可以直接复用 Model 和 Hotfix 代码，保证逻辑绝对一致。
 ## 视频教程
-[ET框架 -- 组件定义与生命周期](https://www.bilibili.com/video/BV1Sn4y1Q7Ne?t=1939.5)  by [和v诺](https://space.bilibili.com/394245976/lists/2952969?type=season)
-
+先看--》 [【合集·ET学习笔记 】by和v诺](https://space.bilibili.com/394245976/lists/2952969?type=season)  
+再看--》 [【Unity ET框架从基础到精通】 by 阿扑up签](https://space.bilibili.com/3546601977023161/lists/3972661?type=season)
 ## ET术语
 
 ### ET中的代码生成
@@ -141,6 +141,11 @@ ET框架中的[Proto2CS](../Share/Tool/Proto2CS/Proto2CS.cs)工具是ET框架‌
 |------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
 | [ClientMessage_C_1000.proto](../Unity/Assets/Config/Proto/ClientMessage_C_1000.proto) |[ClientMessage_C_1000.cs](../Unity/Assets/Scripts/Model/Generate/ClientServer/Message/ClientMessage_C_1000.cs)|
 | [OuterMessage_C_10001.proto](../Unity/Assets/Config/Proto/OuterMessage_C_10001.proto) |[OuterMessage_C_10001.cs](../Unity/Assets/Scripts/Model/Generate/ClientServer/Message/OuterMessage_C_10001.cs)|
+
+#### ExcelExport 
+实现位置[ExcelExporter](../Share/Tool/ExcelExporter/ExcelExporter.cs)  
+生成代码位置 Unity/Assets/Scripts/Model/Generate/*/Config/  
+
 
 #### EntitySystem等自动生成
 ##### 示例
@@ -269,6 +274,17 @@ ET 框架实现上述代码自动生成及注册调用的核心机制主要依�
 
 Analyzer_Attributes
 ![Attributes](readme_imgs/Analyser_Attribute.png)
+
+####  [c,cs,s]模式支持
+生成代码一般会产生三份一模一样的代码放到 Client/ Server/ ClientServer目录下，如 Unity/Assets/Scripts/Model/Generate/*/Config/ 
+怎么实现编译器不报错的，主要靠程序集设置。具体参考 b站视频 [Unity ET框架从基础到精通 -- 双端开发怎么实现](https://www.bilibili.com/video/BV1rhYyeKExP/?share_source=copy_web&vd_source=806cbed30e2817314f6d8f3b290f03e4&p=5&spm_id_from=333.788.videopod.episodes)  
+实现代码
+- [GlobalConfigEditor](../Unity/Assets/Scripts/Editor/GlobalConfigEditor/GlobalConfigEditor.cs)监控GlobalConfig的配置模式变化
+- 调用[AssemblyTool](../Unity/Assets/Scripts/Editor/Assembly/AssemblyTool.cs)执行
+
+简单来说，启用cs模式时，在Client/ Server/目录下放 Ignore.asmdef文件，里面配置了 defineConstraints : IGNORE，当IGNORE定义时才开启这个程序集。不会定义这个变量，所以就不会触发这俩程序集的编译。
+Unity/Assets/Scripts/Model/Generate/Server/Ignore.asmdef
+Unity/Assets/Scripts/Model/Generate/Client/Ignore.asmdef
 
 
 ### SceneType变更

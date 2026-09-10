@@ -21,7 +21,7 @@ namespace ET
             "SkillConfigCategory", 
             "SkillLevelConfigCategory",
             "SkillDamageConfigCategory",
-            "ElementMaterialReactionConfigCategory", 
+            "MaterialReactionConfigCategory", 
             "ElementReactionConfigCategory"
         };
 
