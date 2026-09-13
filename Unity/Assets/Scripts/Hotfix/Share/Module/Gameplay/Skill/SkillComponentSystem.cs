@@ -10,7 +10,6 @@ namespace ET
         private static void Awake(this SkillComponent self)
         {
             Log.Info($"SkillComponentSystem Awake, total skills {SkillConfigCategory.Instance.GetAll().Count}");
-            self.Unit = self.GetParent<Unit>();
 #if DEF_NPBehave
             self.ActiveTrees = new Dictionary<int, Root>();
 #endif
@@ -29,7 +28,7 @@ namespace ET
             }
 
             // 2. 检查Buff限制 (例如: 沉默状态下不可施法)
-            BuffComponent buffComp = self.Unit.GetComponent<BuffComponent>();
+            BuffComponent buffComp = self.GetParent<Unit>().GetComponent<BuffComponent>();
             if (buffComp != null && buffComp.HasBuff(9999)) // 假设9999是沉默Buff
             {
                 return false;
@@ -45,7 +44,7 @@ namespace ET
                 return;
             }
 
-            Unit target = self.Unit.GetParent<UnitComponent>().Get(targetId);
+            Unit target = self.GetParent<Unit>().GetParent<UnitComponent>().Get(targetId);
             if (target == null)
             {
                 return;

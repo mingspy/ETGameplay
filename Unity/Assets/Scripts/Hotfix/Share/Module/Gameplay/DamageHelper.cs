@@ -8,6 +8,24 @@ namespace ET
     {
         #region 伤害处理
 
+
+        /// <summary>
+        /// TODO: 获取用户状态，可以专门搞一个组件管理用户状态。
+        /// </summary>
+        /// <param name="unit"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static int GetStates(Unit unit)
+        {
+            throw new NotImplementedException();
+        }
+        
+        /// <summary>
+        /// TODO: 应用技能前，要先检查目标状态，无敌 等。
+        /// </summary>
+        /// <param name="attacker"></param>
+        /// <param name="target"></param>
+        /// <param name="skill"></param>
         public static void ApplySkillDamage(Unit attacker, Unit target, SkillInstance skill)
         {
             float totalFinalDamage = 0;
@@ -15,13 +33,13 @@ namespace ET
 
             foreach (SkillDamageConfig damageConfig in skill.Damages)
             {
-                DamageInfo info = new DamageInfo()
+                DamageInfo info = new()
                 {
                     DamageType = damageConfig.DamageType,
                     NumericRatio = damageConfig.NumericRatio,
                     FlatBaseValue = damageConfig.FlatBaseValue,
                     CanCrit = damageConfig.CanCrit == 1,
-                    LifestealRate = damageConfig.LifestealRate,
+                    LifestealRate = damageConfig.LifestealRate
                 };
                 CalcDamage(attacker, target, info);
                 damages.Add(info);
@@ -63,7 +81,7 @@ namespace ET
         }
 
         /// <summary>
-        /// 根据角色本身的属性，计算基础攻击力
+        ///     根据角色本身的属性，计算基础攻击力 = 角色攻击面板 * 技能加成比例 + 技能基础攻击。
         /// </summary>
         /// <param name="attacker"></param>
         /// <param name="info"></param>
@@ -74,7 +92,7 @@ namespace ET
                     : attackerNumeric.GetAsInt(NumericType.DamageStart + info.DamageType);
             info.BaseDamage = CalculateBaseDamage(numericValue, (float)info.NumericRatio, (float)info.FlatBaseValue);
         }
-        
+
         /// <summary>
         ///     计算基础伤害 (Base Damage) = 攻击力 * 伤害系数 + 固定伤害值
         ///     注意：此处不包含暴击、穿透、防御减伤、增伤Buff等后续乘区。
@@ -83,9 +101,10 @@ namespace ET
         {
             return panelAttack * DamageRatio + flatValue;
         }
-        
+
         /// <summary>
-        /// 根据攻击者和受害者的防御，穿刺，元素伤害等计算最终伤害。 暂时未考虑全局BUFF效果，TODO: 考虑全局BUFF
+        ///     根据攻击者和受害者的防御，穿刺，元素伤害等计算最终伤害。 <br/>
+        /// TODO: 暂时未考虑全局BUFF效果， 考虑全局BUFF
         /// </summary>
         /// <param name="attacker">攻击者</param>
         /// <param name="target">受击者</param>
@@ -102,10 +121,8 @@ namespace ET
                 return;
             }
 
-            
             NumericComponent attackerNumeric = attacker.GetComponent<NumericComponent>();
             NumericComponent targetNumeric = target.GetComponent<NumericComponent>();
-            float mitigationFactor = 1.0f; // 防御与穿透计算 (根据伤害类型分支)
 
             // 防御 (护甲，魔抗 or 元素抗性)
             float baseDefence = targetNumeric.GetAsInt(NumericType.ResistStart + info.DamageType);
@@ -113,7 +130,6 @@ namespace ET
             float PenetrationPercent = attackerNumeric.GetAsFloat(NumericType.PenetrationPercentStart + info.DamageType);
             // 穿透面板属性
             float PenetrationFlat = attackerNumeric.GetAsInt(NumericType.PenetrationFlatStart + info.DamageType);
-            
 
             // 2. TODO: 计算元素伤害，只有简单的元素反应和相克，最终结果是时加成、减收益或者挂BUFF。
             // 反应结果应用到双方，元素本身不消耗，只改变。
@@ -123,7 +139,8 @@ namespace ET
                 ElementalComponent targetElement = target.GetComponent<ElementalComponent>();
                 if (targetElement != null)
                 {
-                    ReactionInfo reactionResult = targetElement.CheckAndTriggerReaction(attacker, DamageType.ToElementalType(info.DamageType), (int)info.FlatBaseValue, currentDepth);
+                    ReactionInfo reactionResult = targetElement.TryReactOrAppendElement(attacker, DamageType.ToElementalType(info.DamageType),
+                        (int)info.FlatBaseValue, currentDepth);
                     if (reactionResult != null)
                     {
                         finalDamage *= reactionResult.DamageMultiplier;
@@ -131,7 +148,6 @@ namespace ET
                         info.ReactionResult = reactionResult;
                     }
                 }
-     
             }
 
             // 3. 暴击判定 (真伤无暴击，且仅当允许暴击时)
@@ -148,7 +164,8 @@ namespace ET
             }
 
             // 4. 计算穿透
-            finalDamage *= CalcMitigationFactor(CalculateEffectiveDefense(baseDefence, PenetrationPercent, PenetrationFlat));;
+            finalDamage *= CalcMitigationFactor(CalculateEffectiveDefense(baseDefence, PenetrationPercent, PenetrationFlat));
+            ;
 
             // TODO: 应用全局伤害buff，需要时采用下面方案2即可。
             // 目前为止计算都没考虑角色身上的全局增伤BUFF。Numeric组件每个属性虽然有FinalAdd和FinalPct，但是都是针对基础属性的。
@@ -156,12 +173,9 @@ namespace ET
             // 2. 同样利用Numeric组件，增加一个全局增伤组件 (finalDamage + finalAdd) * (1 + finalPct)
 
             finalDamage += elementExtraDamage; // 加上元素额外伤害不参与穿透和防御计算，直接附加。
-            
+
             info.FinalDamage = Math.Max(finalDamage, 0); // 防止负伤害，即造成回血效果。比如元素克制反而回血，后期打不动。
-
         }
-
-
 
         /// <summary>
         ///     有效防御 = 基础防御 * ( 1 - 穿透比例) - 穿透固定值
@@ -181,14 +195,13 @@ namespace ET
         {
             return C / (C + defense);
         }
-        
 
         /// <summary>
-        /// 应用伤害，这里只是示例，先完成相应功能。<br/>
-        /// 实际系统时，
-        /// 如果是MOBA，则先计算所有玩家打出的伤害，防止玩家死亡导致其发出的伤害判定无效，然后统一应用伤害。
-        /// 如果是RPG,则计算AOI范围内的伤害，然后再应用。<br/>
-        /// 另外一种解法是，玩家打出的技能不随死亡销毁，更简单一些。即死亡与技能不会量子纠缠 :P
+        ///     应用伤害，这里只是示例，先完成相应功能。<br />
+        ///     实际系统时，
+        ///     如果是MOBA，则先计算所有玩家打出的伤害，防止玩家死亡导致其发出的伤害判定无效，然后统一应用伤害。
+        ///     如果是RPG,则计算AOI范围内的伤害，然后再应用。<br />
+        ///     另外一种解法是，玩家打出的技能不随死亡销毁，更简单一些。即死亡与技能不会量子纠缠 :P。
         /// </summary>
         /// <param name="eventData"></param>
         public static void ApplyDamage(BattleEventData eventData)
@@ -228,8 +241,10 @@ namespace ET
                 // 0. 检查元素伤害，并应用。
                 if (DamageType.IsElemental(damage.DamageType) && damage.ReactionResult != null)
                 {
-                    self.GetComponent<ElementalComponent>().ApplyReactionEffects(data.Attacker,damage.ReactionResult, damage.ReactionResult.CurrentDepth);
+                    self.GetComponent<ElementalComponent>()
+                            .ApplyReactionEffects(data.Attacker, damage.ReactionResult, damage.ReactionResult.CurrentDepth);
                 }
+
                 // 1. 反甲效果
                 if (damage.DamageType == DamageType.Physical)
                 {

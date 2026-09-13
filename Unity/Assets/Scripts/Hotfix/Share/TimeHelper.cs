@@ -1,7 +1,5 @@
 namespace ET
 {
-    
-
 
 public static class TimeHelper
 {
@@ -70,6 +68,11 @@ public static class TimeHelper
     public static long ToMS(double seconds)
     {
         return (long)(seconds * OneSecond);
+    }
+    
+    public static float MsToSec(long ms)
+    {
+        return ms / (float)OneSecond;
     }
 }
 

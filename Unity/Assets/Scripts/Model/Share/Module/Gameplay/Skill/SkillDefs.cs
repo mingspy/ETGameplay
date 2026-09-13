@@ -41,7 +41,7 @@ namespace ET
                 Fire = 3, // 元素伤害 火，属于法术伤害的一种，但是单独拿出来，增加趣味性(如塞尔达传说)
                 Water = 4, // 水
                 Ice = 5, // 冰
-                Electricity = 6, // 雷 / 电
+                Lightning = 6, // 雷 / 电
                 Wind = 7, // 风
                 Earth = 8, // 地 / 土
                 Light = 9, //  光 / 圣
@@ -55,9 +55,9 @@ namespace ET
             return damageType >= Fire && damageType <= Dark;
         }
 
-        public static ElementalType ToElementalType(int damageType)
+        public static ElementType ToElementalType(int damageType)
         {
-            return (ElementalType)(damageType - Magical);
+            return (ElementType)(damageType - Magical);
         }
     }
 

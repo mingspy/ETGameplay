@@ -29,22 +29,19 @@ namespace ET
         /// <summary>
         ///     当前激活的元素列表（支持多元素共存）
         /// </summary>
-        public List<ElementalAttachment> ActiveElements = new(4);
+        public List<Elemental> AttachedElements = new(4);
 
         // ========== 材质状态 ==========
         /// <summary>
         ///     基础材质（物体固有材质）
         /// </summary>
-        public ElementalAttachment BaseMaterial;
+        public Elemental BaseMaterial = new Elemental{AffixType = ElementalType.Material};
 
         /// <summary>
         ///     表面材质覆盖（临时状态，如淋湿、结冰）
         /// </summary>
-        public ElementalAttachment SurfaceMaterial;
-
-        [MemoryPackIgnore]
-        [BsonIgnore]
-        public Unit Unit { get; set; }
+        public Elemental SurfaceMaterial =  new Elemental{AffixType = ElementalType.Material};
+        
 
         /// <summary>
         ///     元素连锁反应最大深度（防止团战无限连锁导致性能问题/数值溢出）
@@ -60,5 +57,33 @@ namespace ET
         ///     扩散默认范围（码）
         /// </summary>
         public float DefaultSpreadRadius { get; set; } = 3.5f;
+    }
+    /// <summary>
+    /// 超载：火雷反应，额外范围伤害+小击退
+    /// </summary>
+    public struct OverloadEvent
+    {
+        public Unit Target { get; set; }
+        public float KnockbackDistance { get; set; }
+        public float AoeRadius { get; set; }
+        public float Damage { get; set; }
+    }
+
+    /// <summary>
+    /// 超导：冰雷反应，雷元素攻击冰属性，减雷抗
+    /// </summary>
+    public struct SuperConductEvent
+    {
+        public Unit Target { get; set; }
+        public float ResistanceReduction  { get; set; }
+        public float Duration { get; set; }
+    }
+
+    public struct SwirlEvent
+    {
+        public Unit Caster  { get; set; }
+        public ElementType SpreadElement  { get; set; }
+        public float Radius { get; set; } 
+        public List<long> AffectedUnits{ get; set; }
     }
 }

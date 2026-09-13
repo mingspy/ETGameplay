@@ -21,8 +21,7 @@ namespace ET
             "SkillConfigCategory", 
             "SkillLevelConfigCategory",
             "SkillDamageConfigCategory",
-            "MaterialReactionConfigCategory", 
-            "ElementReactionConfigCategory"
+            "ReactionConfigCategory"
         };
 
         public static string GetPath(string configName)

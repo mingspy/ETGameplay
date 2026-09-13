@@ -8,9 +8,5 @@ namespace ET
     public class EquipComponent : Entity, IAwake
     {
         public Dictionary<int, EquipConfig> Equips = new(); // 装备槽位->装备配置
-
-        [MemoryPackIgnore]
-        [BsonIgnore]
-        public Unit Unit { get; set; }
     }
 }

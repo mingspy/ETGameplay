@@ -7,7 +7,6 @@ namespace ET
         [EntitySystem]
         private static void Awake(this EquipComponent self)
         {
-            self.Unit = self.GetParent<Unit>();
         }
 
         /// 穿戴装备
@@ -26,7 +25,7 @@ namespace ET
 
             self.Equips[config.Slot] = config;
 
-            NumericComponent numeric = self.Unit.GetComponent<NumericComponent>();
+            NumericComponent numeric = self.GetParent<Unit>().GetComponent<NumericComponent>();
 
             // 叠加所有装备的基础属性
             for (int i = 0; i < config.Numerics.Length; i++)
@@ -44,7 +43,7 @@ namespace ET
             if (self.Equips.TryGetValue(slot, out EquipConfig config))
             {
                 self.Equips.Remove(slot);
-                NumericComponent numeric = self.Unit.GetComponent<NumericComponent>();
+                NumericComponent numeric = self.GetParent<Unit>().GetComponent<NumericComponent>();
 
                 // 叠加所有装备的基础属性
                 for (int i = 0; i < config.Numerics.Length; i++)

@@ -45,5 +45,11 @@ namespace ET.Server
         {
             return self.GetComponent<AOIEntity>().GetBeSeePlayers();
         }
+        
+        // 获取看见unit的玩家，主要用于广播
+        public static Dictionary<long, EntityRef<AOIEntity>> GetSeeUnits(this Unit self)
+        {
+            return self.GetComponent<AOIEntity>().GetSeeUnits();
+        }
     }
 }

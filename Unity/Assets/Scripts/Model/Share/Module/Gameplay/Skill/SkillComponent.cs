@@ -10,9 +10,8 @@ namespace ET
     [ComponentOf(typeof(Unit))]
     public class SkillComponent : Entity, IAwake
     {
-        [MemoryPackIgnore]
-        [BsonIgnore]
-        public Unit Unit { get; set; }
+        //[MemoryPackIgnore]
+        //[BsonIgnore]
 
         public Dictionary<int, long> Cooldowns { get; set; }
 #if DEF_NPBehave

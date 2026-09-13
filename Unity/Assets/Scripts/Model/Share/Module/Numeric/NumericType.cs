@@ -2,22 +2,64 @@
 {
     
 
-
-// 这个可弄个配置表生成
-public static class NumericTypeSuffix
-{
-    public const int Base = 1;
-    public const int Add = 2;
-    public const int Pct = 3;
-    public const int FinalAdd = 4;
-    public const int FinalPct = 5;
-}
-
 /// <summary>
-///     相当GAS中的AttributeTag。数值的的规则是 xBase = x * 10 + 1, xAdd = x * 10 + 2，以此类推 xFinalPct = x * 10 + 5。
+///     NumericType 相当GAS中的AttributeTag。
+/// 数值的的规则是 xBase = x * 10 + 1, xAdd = x * 10 + 2，以此类推 xFinalPct = x * 10 + 5。<br/>
+/// final = ((Base + Add) * (1 + Pct) + FinalAdd)* ( 1 + FinalPct);<br/>
 /// </summary>
 public static class NumericType
 {
+    private const int _Base = 1;
+    private const int _Add = 2;
+    private const int _Pct = 3;
+    private const int _FinalAdd = 4;
+    private const int _FinalPct = 5;
+    
+    /// <summary>
+    /// int 转float的乘数
+    /// </summary>
+    public const int FLOAT_INT_MULTIPLY = 10000;
+
+    /// <summary>
+    /// numeric 的基数索引，比如Hp的基数 = Hp * 10 + 1
+    /// </summary>
+    /// <param name="numeric"></param>
+    /// <returns></returns>
+    public static int Base(int numeric)
+    {
+        return numeric * 10 + _Base;
+    }
+    
+    public static int Add(int numeric)
+    {
+        return numeric * 10 + _Add;
+    }
+    
+    public static int Pct(int numeric)
+    {
+        return numeric * 10 + _Pct;
+    }
+    
+    public static int FinalAdd(int numeric)
+    {
+        return numeric * 10 + _FinalAdd;
+    }
+    
+    public static int FinalPct(int numeric)
+    {
+        return numeric * 10 + _FinalPct;
+    }
+
+    public static int AsInt(float value)
+    {
+        return (int) (value * FLOAT_INT_MULTIPLY);
+    }
+    
+    public static float AsFloat(int value)
+    {
+        return  (float)value / FLOAT_INT_MULTIPLY;
+    }
+    
     //小于此值的都被认为是原始属性
     public const int Max = 10000;
     public const int AOI = 9999;
@@ -88,11 +130,10 @@ public static class NumericType
     public const int FireResist = 1203; // 火
     public const int WaterResist = 1204; // 水
     public const int IceResist = 1205; // 冰
-    public const int ElectricityResist = 1206; // 雷 / 电
+    public const int LightningResist = 1206; // 雷 / 电
     public const int WindResist = 1207; // 风
     public const int EarthResist = 1208; // 地 / 土
     public const int LightResist = 1209; //  光 / 圣
-
     public const int DarkResist = 1210; //  暗 / 邪
     // 元素抗性结束
 
@@ -116,7 +157,7 @@ public static class NumericType
     public const int FirePenetrationFlat = 1303;
     public const int WaterPenetrationFlat = 1304; // 水
     public const int IcePenetrationFlat = 1305; // 冰
-    public const int ElectricityPenetrationFlat = 1306; // 雷 / 电
+    public const int LightningPenetrationFlat = 1306; // 雷 / 电
     public const int WindPenetrationFlat = 1307; // 风
     public const int EarthPenetrationFlat = 1308; // 地 / 土
     public const int LightPenetrationFlat = 1309; //  光 / 圣

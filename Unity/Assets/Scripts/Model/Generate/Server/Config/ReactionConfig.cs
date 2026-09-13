@@ -7,28 +7,28 @@ using System.ComponentModel;
 namespace ET
 {
     [Config]
-    public partial class ElementReactionConfigCategory : Singleton<ElementReactionConfigCategory>, IMerge
+    public partial class ReactionConfigCategory : Singleton<ReactionConfigCategory>, IMerge
     {
         [BsonElement]
         [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfArrays)]
-        private Dictionary<int, ElementReactionConfig> dict = new();
+        private Dictionary<int, ReactionConfig> dict = new();
 		
         public void Merge(object o)
         {
-            ElementReactionConfigCategory s = o as ElementReactionConfigCategory;
+            ReactionConfigCategory s = o as ReactionConfigCategory;
             foreach (var kv in s.dict)
             {
                 this.dict.Add(kv.Key, kv.Value);
             }
         }
 		
-        public ElementReactionConfig Get(int id)
+        public ReactionConfig Get(int id)
         {
-            this.dict.TryGetValue(id, out ElementReactionConfig item);
+            this.dict.TryGetValue(id, out ReactionConfig item);
 
             if (item == null)
             {
-                throw new Exception($"配置找不到，配置表名: {nameof (ElementReactionConfig)}，配置id: {id}");
+                throw new Exception($"配置找不到，配置表名: {nameof (ReactionConfig)}，配置id: {id}");
             }
 
             return item;
@@ -39,12 +39,12 @@ namespace ET
             return this.dict.ContainsKey(id);
         }
 
-        public Dictionary<int, ElementReactionConfig> GetAll()
+        public Dictionary<int, ReactionConfig> GetAll()
         {
             return this.dict;
         }
 
-        public ElementReactionConfig GetOne()
+        public ReactionConfig GetOne()
         {
             if (this.dict == null || this.dict.Count <= 0)
             {
@@ -57,7 +57,7 @@ namespace ET
         }
     }
 
-	public partial class ElementReactionConfig: ProtoObject, IConfig
+	public partial class ReactionConfig: ProtoObject, IConfig
 	{
 		/// <summary>Id</summary>
 		public int Id { get; set; }
@@ -65,8 +65,10 @@ namespace ET
 		public string Description { get; set; }
 		/// <summary>源元素</summary>
 		public int FromElement { get; set; }
-		/// <summary>目标元素</summary>
-		public int ToElement { get; set; }
+		/// <summary>目标</summary>
+		public int To { get; set; }
+		/// <summary>目标类型 0 元素 1 材质 2 反应结果</summary>
+		public int ToType { get; set; }
 		/// <summary>反应结果，火烧木头为例，产生结果是持续燃烧，直到木头烧完。结果会挂在材质表面。</summary>
 		public int Reaction { get; set; }
 		/// <summary>伤害放大系数，只针对元素伤害放大, > 1 为放大， < 1 为减少伤害。</summary>

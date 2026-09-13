@@ -9,7 +9,7 @@ namespace ET
     {
         public static float GetAsFloat(this NumericComponent self, int numericType)
         {
-            return (float)self.GetByKey(numericType) / 10000;
+            return (float)self.GetByKey(numericType) / NumericType.FLOAT_INT_MULTIPLY;
         }
 
         public static int GetAsInt(this NumericComponent self, int numericType)
@@ -24,7 +24,7 @@ namespace ET
 
         public static void Set(this NumericComponent self, int nt, float value)
         {
-            self[nt] = (long)(value * 10000);
+            self[nt] = (long)(value * NumericType.FLOAT_INT_MULTIPLY);
         }
 
         public static void Set(this NumericComponent self, int nt, int value)

@@ -8,7 +8,7 @@ namespace ET
        | Fire | 火 / 烈焰 | Fire | Flame, Pyro | "Pyro" 常用于技能前缀或职业分类 |
        | Water | 水 / 流水 | Water | Hydro, Aqua | "Hydro" 更具魔法感，常见于元素反应体系 |
        | Ice | 冰 / 寒冰 | Ice | Frost, Cryo | "Frost" 侧重寒冷状态，"Cryo" 侧重冰冻机制 |
-       | Electricity | 雷 / 电 | Lightning | Thunder, Electro, Volt | 建议修改：Electricity 过于物理化。MOBA中常用 Lightning (闪电) 或 Thunder (雷霆)。"Electro" 常见于二次元 RPG。 |
+       | Lightning | 雷 / 电 | Lightning | Thunder, Electro, Volt | 建议修改：Lightning 过于物理化。MOBA中常用 Lightning (闪电) 或 Thunder (雷霆)。"Electro" 常见于二次元 RPG。 |
        | Wind | 风 / 疾风 | Wind | Anemo, Gale, Air | "Anemo" 是特定游戏术语，通用推荐 Wind 或 Gale (狂风) |
        | Earth | 地 / 土 | Earth | Geo, Terra, Stone | "Geo" 侧重岩元素，"Terra" 更具古老魔法感 |
        | Light | 光 / 圣 | Light | Holy, Radiant, Lux | RPG中若涉及神职，常用 Holy (神圣)；MOBA中常用 Light |
@@ -29,9 +29,9 @@ namespace ET
        | Mist | 雾 / 幻 | Mist | 隐身、闪避提升、致盲；辅助或刺客类元素 |
      */
     /// <summary>
-    ///     元素类型
+    ///     元素类型。⚠️ ElementalType 是附着在角色身上的管理单元类型，为了区分是元素还是材质
     /// </summary>
-    public enum ElementalType
+    public enum ElementType
     {
         None = 0,
 
@@ -39,7 +39,7 @@ namespace ET
         Fire, // 火
         Water, // 水
         Ice, // 冰
-        Lightning, // 雷 (替代 Electricity)
+        Lightning, // 雷 (替代 Lightning)
         Wind, // 风
         Earth, // 地
 
@@ -77,7 +77,7 @@ namespace ET
         /// <summary>
         ///     超导 (冰+雷)
         /// </summary>
-        Superconduct,
+        SuperConduct,
 
         /// <summary>
         ///     感电 (水+雷)
@@ -326,41 +326,66 @@ namespace ET
         public string ReactionVfxName{ get; set; }
     }
 
- 
-    [EnableClass]
-    public class ReactionInfo
-    {
-        // set By Request
-        public ElementalType AttackElement { get; set; }
-        public int AttackAmount { get; set; }
-
-        // Results
-        public int CurrentDepth { get; set; }
-        public ReactionType ResultType{ get; set; }
-        public float DamageMultiplier{ get; set; } // 伤害倍率（增幅反应）
-        public float ExtraDamage{ get; set; } // 额外固定伤害（超载等）
-        public int ReactionAmount{ get; set; } // 元素消耗量
-        public int RestAmount{ get; set; } // 元素剩余量
-        public bool OnMaterial{ get; set; } // 是否与Material反应
-        
-        public ElementalAttachment OnWhichAttachment{ get; set; }
-        public ElementReactionConfig ElementReactionConfig{ get; set; } // 使用的反应规则
-        public MaterialReactionConfig MaterialReactionConfig{ get; set; } // 使用的反应规则
+    /// <summary>
+    /// 附着在角色身上的类型，随时间衰减
+    /// </summary>
+    public enum ElementalType{
+        Elemental = 0, // 元素
+        Material,  // 材质
+        Reaction,  // 反应结果
     }
 
     /// <summary>
     ///     元素附着信息
     /// </summary>
-    public class ElementalAttachment : ETObject
+    [EnableClass]
+    public class Elemental
     {
-        public int DecayPerSecond{ get; set; }// 每秒消耗
-        public ElementalType ElementalType{ get; set; }
-        public long EndTime{ get; set; } // 结束时间
+        public int Type { get; set; } // 根据AffixType的类型决定Element的类型
+        public ElementalType AffixType { get; set; }
         public int Gauge{ get; set; } // 元素残留数量
+        public int DecayPerSecond{ get; set; }// 每秒消耗
+        public long EndTime{ get; set; } // 结束时间
         public long LastUpdateTime{ get; set; }
-        public MaterialType Material{ get; set; }
         public long ReactionEndTime{ get; set; } // 反应结束时间
-        public ReactionType ResultType{ get; set; }
+        public ReactionType Reaction{ get; set; }
+        
+        public ElementType NewElement{ get; set; } // 反应产生的新元素
         public long SourceId{ get; set; } // 附着来源（技能/装备/单位）
+
+        public bool IsExpired(long currentTime)
+        {
+            if (currentTime >= EndTime || Gauge <= 0)
+            {
+                return Reaction == ReactionType.None || currentTime >= ReactionEndTime;
+            }
+            return false ;
+        }
+
+        public void Clear()
+        {
+            this.Type = 0;
+            this.EndTime = 0;
+        }
+    }
+    
+     
+    [EnableClass]
+    public class ReactionInfo
+    {
+        // set By Request
+        public ElementType SourceElement { get; set; }
+        public int SourceAmount { get; set; }
+
+        // Results
+        public int CurrentDepth { get; set; }
+        public ReactionType Result{ get; set; }
+        public float DamageMultiplier{ get; set; } // 伤害倍率（增幅反应）
+        public float ExtraDamage{ get; set; } // 额外固定伤害（超载等）
+        public int ReactionAmount{ get; set; } // 源元素消耗量
+        public int RestAmount{ get; set; } // 源元素剩余量
+        
+        public Elemental Reactant{ get; set; } // 反应对象
+        public ReactionConfig  ReactionConfig{ get; set; } // 使用的反应规则
     }
 }
