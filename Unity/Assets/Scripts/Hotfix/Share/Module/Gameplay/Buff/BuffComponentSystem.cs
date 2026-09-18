@@ -26,12 +26,12 @@ namespace ET
             foreach (var kvp in self.Buffs)
             {
                 BuffDataBase buff = kvp.Value;
-                IBuffRunner runner = BuffRunnerFactory.Instance.Get(buff);
+                IBuffRunner runner = BuffFactory.Instance.GetRunner(buff.GetType());
                 runner.TickBuff(self, buff, now).Coroutine();
                 // 检查周期性
                 if (buff.Period > 0 && now >= buff.PeriodEndTime)
                 {
-                    BuffRunnerFactory.Instance.Get(buff).ApplyBuff(self, buff).Coroutine();
+                    runner.ApplyBuff(self, buff).Coroutine();
                     buff.PeriodEndTime = now + buff.Period;
                 }
 
@@ -63,18 +63,42 @@ namespace ET
 
             return false;
         }
-        
+
+        public static int AddBuff(this BuffComponent self, long casterId, int buffId )
+        {
+            BuffConfig config = BuffConfigCategory.Instance.Get(buffId);
+            if (config == null)
+            {
+                return -1;
+            }
+            BuffDataBase buff = BuffFactory.Instance.CreateBuff((BuffType)config.BuffType);
+            buff.CasterId = casterId;
+            buff.BuffConfig = config;
+            return self.AddBuff(buff);
+        }
+
+        public static int AddBuff(this BuffComponent self, long casterId, BuffType buffType, long durationMs)
+        {
+            BuffDataBase buff = BuffFactory.Instance.CreateBuff(buffType);
+            buff.Duration = TimeHelper.ToMS(durationMs);
+            buff.CasterId = casterId;
+            return self.AddBuff(buff);
+        }
 
         public static int AddBuff(this BuffComponent self, BuffDataBase buff)
         {
-            IBuffRunner runner = BuffRunnerFactory.Instance.Get(buff);
+            if (buff == null)
+            {
+                Log.Error($"input buff is null");
+                return -1;
+            }
+            
+            IBuffRunner runner = BuffFactory.Instance.GetRunner(buff.GetType());
             if (runner == null)
             {
                 Log.Error($"{buff.GetType()} has not implement IBuffRunner");
                 return -1;
             }
-            
-            long now = TimeHelper.Now();
             
             if (buff.DurationType == BuffDurationType.Instant)
             {
@@ -82,8 +106,7 @@ namespace ET
             }
             else
             {
-                buff.StartTime = now;
-                buff.EndTime = now + buff.Duration;
+                
                 if (buff.BuffId > 0 && self.Buffs.TryGetValue(buff.BuffId, out BuffDataBase added))
                 {
                     // 同类型可叠加则叠加层数，不可叠加则刷新时间
@@ -103,6 +126,7 @@ namespace ET
                     {
                         buff.BuffId = self.GenId();
                     }
+                    buff.Init(TimeHelper.Now());
                     self.Buffs[buff.BuffId] = buff;
                     runner.ApplyBuff(self, buff).Coroutine();
                 }
@@ -120,7 +144,7 @@ namespace ET
                 return;
             }
 
-            BuffRunnerFactory.Instance.Get(buff).RemoveBuff(self, buff).Coroutine();
+            BuffFactory.Instance.GetRunner(buff.GetType()).RemoveBuff(self, buff).Coroutine();
  
             EventSystem.Instance.PublishAsync(self.Scene(), new OnBuffRemovedEvent() { Unit = self.GetParent<Unit>(), Buff = buff }).Coroutine();
         }
@@ -132,45 +156,11 @@ namespace ET
                 return;
             }
 
-            BuffRunnerFactory.Instance.Get(buff).ExpiredBuff(self, buff).Coroutine();
+            BuffFactory.Instance.GetRunner(buff.GetType()).ExpiredBuff(self, buff).Coroutine();
  
             EventSystem.Instance.PublishAsync(self.Scene(), new OnBuffExpiredEvent() { Unit = self.GetParent<Unit>(), Buff = buff }).Coroutine();
         }
-
-        private static void ApplyBuffEffect(this BuffComponent self, BuffConfig config, int stack, BuffInstance instance)
-        {
-            NumericComponent NumericComponent = self.GetParent<Unit>().GetComponent<NumericComponent>();
-            // TODO : 根据Buff类型设置状态
-            if (config.BuffType == (uint)BuffType.Numeric)
-            {
-                for (int i = 0; i < config.Numerics.Length; i++)
-                {
-                    //var modifyType = config.ModifyTypes[i]; 
-                    int numeric = config.Numerics[i];
-                    int effect = config.EffectValues[i] * stack;
-                    NumericComponent[numeric] += effect;
-                    if (instance != null)
-                    {
-                        instance.TotalEffects[i] += effect;
-                    }
-                }
-            }
-        }
-
-        private static void RemoveBuffEffect(this BuffComponent self, BuffInstance instance)
-        {
-            // TODO : 根据Buff类型移除状态
-            NumericComponent NumericComponent = self.GetParent<Unit>().GetComponent<NumericComponent>();
-            BuffConfig config = instance.Config;
-            if (config.BuffType == (uint)BuffType.Numeric)
-            {
-                for (int i = 0; i < config.Numerics.Length; i++)
-                {
-                    int numeric = config.Numerics[i];
-                    NumericComponent[numeric] -= instance.TotalEffects[i];
-                }
-            }
-        }
+        
 
         public static void RemoveBuffs(this BuffComponent self, BuffType buffType)
         {

@@ -18,8 +18,7 @@ namespace ET
         public static void FreezeMs(this StateComponent self, int ms, long casterId)
         {
             BuffComponent buffComponent = self.GetParent<Unit>().GetComponent<BuffComponent>();
-            BuffDataBase buff = new ControlBuff(State.Frozen, BuffType.Frozen, ms, casterId);
-            buffComponent.AddBuff(buff);
+            buffComponent.AddBuff(casterId, BuffType.Frozen, ms);
             EventSystem.Instance.Publish(self.Scene(), new FrozenEvent { Target = self.GetParent<Unit>(), Duration = TimeHelper.MsToSec(ms) });
         }
         
@@ -39,8 +38,7 @@ namespace ET
         public static void StunMs(this StateComponent self, int ms, long casterId)
         {
             BuffComponent buffComponent = self.GetParent<Unit>().GetComponent<BuffComponent>();
-            BuffDataBase buff = new ControlBuff(State.Stunned, BuffType.Stunned, ms, casterId);
-            buffComponent.AddBuff(buff);
+            buffComponent.AddBuff(casterId, BuffType.Stunned, ms);
             EventSystem.Instance.Publish(self.Scene(), new StunnedEvent { Target = self.GetParent<Unit>(), Duration = TimeHelper.MsToSec(ms) });
         }
         

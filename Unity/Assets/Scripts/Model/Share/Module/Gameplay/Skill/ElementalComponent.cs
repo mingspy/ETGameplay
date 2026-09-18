@@ -21,6 +21,7 @@ namespace ET
     ///     - 元素与角色附带的元素反应，大部分情况只产生一次性伤害，比如火元素可以点燃木材质，但是只会消耗掉角色身上附带的木元素，不产生持续燃烧和传导。
     ///     技术上可以实现元素的持续反应和传导，但是从感官上，角色身上挂载的元素量一般比较少且时间短。（TODO:待定是否支持元素与元素传导，在配置上控制）。<br />
     ///     - 优先计算材质反应，然后计算附着元素，一次攻击只产生一次效果。<br />
+    ///     TODO: 材质和元素处理分开
     /// </summary>
     [ComponentOf(typeof(Unit))]
     public class ElementalComponent : Entity, IAwake<MaterialType>, IDestroy, IUpdate
@@ -35,12 +36,12 @@ namespace ET
         /// <summary>
         ///     基础材质（物体固有材质）
         /// </summary>
-        public Elemental BaseMaterial = new Elemental{AffixType = ElementalType.Material};
+        public Elemental BaseMaterial = new Elemental{ElementalType = ElementalType.Material, ElementalPosition= ElementalPosition.Base};
 
         /// <summary>
         ///     表面材质覆盖（临时状态，如淋湿、结冰）
         /// </summary>
-        public Elemental SurfaceMaterial =  new Elemental{AffixType = ElementalType.Material};
+        public Elemental SurfaceMaterial =  new Elemental{ElementalType = ElementalType.Material, ElementalPosition= ElementalPosition.Surface};
         
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace ET
         /// <summary>
         ///     扩散元素强度衰减系数
         /// </summary>
-        public float SpreadIntensityDecay { get; set; } = 0.7f;
+        public float SpreadDecay { get; set; } = 0.7f;
 
         /// <summary>
         ///     扩散默认范围（码）

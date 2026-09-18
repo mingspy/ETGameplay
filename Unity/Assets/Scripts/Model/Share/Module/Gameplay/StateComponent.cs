@@ -11,11 +11,11 @@ namespace ET
         Casting = 1 << 2, // 释放技能 Spell0-N
         Stunned = 1 << 3, // 被击中（硬直), 无法移动，无法释放魔法
         Dead = 1 << 4, // 死亡
-        SuperArmor = 1 << 5, // 霸体（免疫控制）
-        Invincible = 1 << 6, // 无敌
-        Silence = 1 << 7,  // 沉默：无法释放魔法
+        Invincible = 1 << 5, // 无敌
+        Silence = 1 << 6,  // 沉默：无法释放魔法
         Frozen = 1 << 7,
-        Enhanced = 1 << 8,
+        SuperArmor = 1 << 8, // 霸体（免疫控制）
+        Enhanced = 1 << 9, // 强化状态
         IsCasting = Attacking | Casting,
         Abnormal = Stunned | Dead
         

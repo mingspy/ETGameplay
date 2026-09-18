@@ -73,8 +73,10 @@ namespace ET
 		public int Reaction { get; set; }
 		/// <summary>伤害放大系数，只针对元素伤害放大, > 1 为放大， < 1 为减少伤害。</summary>
 		public double DamageMultiplier { get; set; }
-		/// <summary>反应强度，0不发生反应， 一般Intensity 设置1。 攻击者不消耗元素量，反应结果是, 被攻击者元素销量 和产生的伤害都是 Min(攻击者元素量 * Intensity, 被攻击者元素销量)</summary>
+		/// <summary>反应强度，0不消耗目标元素， 一般Intensity 设置1。 攻击者不消耗元素量，反应结果是, 被攻击者元素销量 和产生的伤害都是 Min(攻击者元素量 * Intensity, 被攻击者元素销量)</summary>
 		public double Intensity { get; set; }
+		/// <summary>产生的新元素/材质, 0 无</summary>
+		public int NewElement { get; set; }
 		/// <summary>反应后剩余元素每秒消耗量, 0不消耗。比如火点燃了木头，后续持续消耗剩余的木头。</summary>
 		public int DecayPerSecond { get; set; }
 		/// <summary>反应后附加元素的持续时间，单位毫秒。如果一直燃烧，直到结束，设置一个较大值。</summary>

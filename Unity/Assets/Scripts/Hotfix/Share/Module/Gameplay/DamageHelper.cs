@@ -39,7 +39,7 @@ namespace ET
                     NumericRatio = damageConfig.NumericRatio,
                     FlatBaseValue = damageConfig.FlatBaseValue,
                     CanCrit = damageConfig.CanCrit == 1,
-                    LifestealRate = damageConfig.LifestealRate
+                    LifeStealRate = damageConfig.LifestealRate
                 };
                 CalcDamage(attacker, target, info);
                 damages.Add(info);
@@ -89,7 +89,7 @@ namespace ET
         {
             NumericComponent attackerNumeric = attacker.GetComponent<NumericComponent>();
             float numericValue = info.DamageType == DamageType.True ? attackerNumeric.GetAsInt(NumericType.TrueDamage)
-                    : attackerNumeric.GetAsInt(NumericType.DamageStart + info.DamageType);
+                    : attackerNumeric.GetAsInt(NumericType.Placeholder_DamageStart + info.DamageType);
             info.BaseDamage = CalculateBaseDamage(numericValue, (float)info.NumericRatio, (float)info.FlatBaseValue);
         }
 
@@ -125,11 +125,11 @@ namespace ET
             NumericComponent targetNumeric = target.GetComponent<NumericComponent>();
 
             // 防御 (护甲，魔抗 or 元素抗性)
-            float baseDefence = targetNumeric.GetAsInt(NumericType.ResistStart + info.DamageType);
+            float baseDefence = targetNumeric.GetAsInt(NumericType.Placeholder_ResistStart + info.DamageType);
             // 穿透比例
-            float PenetrationPercent = attackerNumeric.GetAsFloat(NumericType.PenetrationPercentStart + info.DamageType);
+            float PenetrationPercent = attackerNumeric.GetAsFloat(NumericType.Placeholder_PctPenStart + info.DamageType);
             // 穿透面板属性
-            float PenetrationFlat = attackerNumeric.GetAsInt(NumericType.PenetrationFlatStart + info.DamageType);
+            float PenetrationFlat = attackerNumeric.GetAsInt(NumericType.Placeholder_FlatPenStart + info.DamageType);
 
             // 2. TODO: 计算元素伤害，只有简单的元素反应和相克，最终结果是时加成、减收益或者挂BUFF。
             // 反应结果应用到双方，元素本身不消耗，只改变。
@@ -139,7 +139,7 @@ namespace ET
                 ElementalComponent targetElement = target.GetComponent<ElementalComponent>();
                 if (targetElement != null)
                 {
-                    ReactionInfo reactionResult = targetElement.TryReactOrAppendElement(attacker, DamageType.ToElementalType(info.DamageType),
+                    ReactionInfo reactionResult = targetElement.TryReactOrAppendElement(attacker, DamageType.ToElement(info.DamageType),
                         (int)info.FlatBaseValue, currentDepth);
                     if (reactionResult != null)
                     {
@@ -248,7 +248,7 @@ namespace ET
                 // 1. 反甲效果
                 if (damage.DamageType == DamageType.Physical)
                 {
-                    float ratio = numeric.GetAsFloat(NumericType.ThornmailRate);
+                    float ratio = numeric.GetAsFloat(NumericType.ThornMailRate);
                     if (ratio > 0.01)
                     {
                         float reflectDamage = damage.FinalDamage * ratio;
@@ -291,9 +291,9 @@ namespace ET
                 if (damage.DamageType == DamageType.Physical || damage.DamageType == DamageType.Magical)
                 {
                     float ratio = damage.DamageType == DamageType.Physical ?
-                            numeric.GetAsFloat(NumericType.LifestealRate) :
-                            numeric.GetAsFloat(NumericType.MagicLifestealRate);
-                    ratio += (float)damage.LifestealRate;
+                            numeric.GetAsFloat(NumericType.LifeStealRate) :
+                            numeric.GetAsFloat(NumericType.MagicLifeStealRate);
+                    ratio += (float)damage.LifeStealRate;
 
                     totalStealLife += damage.FinalDamage * ratio;
                 }

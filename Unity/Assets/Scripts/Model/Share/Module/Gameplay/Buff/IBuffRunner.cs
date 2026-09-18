@@ -15,6 +15,8 @@ namespace ET
         ETTask TickBuff(BuffComponent buffComponent, BuffDataBase buff, long currentTimeMs);
         ETTask RemoveBuff(BuffComponent buffComponent, BuffDataBase buff);
         ETTask ExpiredBuff(BuffComponent buffComponent, BuffDataBase buff);
+
+        public bool CanHandleBuff(BuffType buffType);
     }
 
     [EnableClass]
@@ -26,6 +28,7 @@ namespace ET
         protected abstract ETTask DoRemoveBuff(BuffComponent buffComponent, BuffDataBase buff);
         protected abstract ETTask DoExpiredBuff(BuffComponent buffComponent, BuffDataBase buff);
 
+        public abstract bool CanHandleBuff(BuffType buffType);
 
         public async ETTask ApplyBuff(BuffComponent buffComponent, BuffDataBase buff)
         {

@@ -38,26 +38,27 @@ namespace ET
         public const int True = 0, // 真伤
                 Physical = 1, // 物理伤害
                 Magical = 2, // 法术伤害
-                Fire = 3, // 元素伤害 火，属于法术伤害的一种，但是单独拿出来，增加趣味性(如塞尔达传说)
-                Water = 4, // 水
-                Ice = 5, // 冰
-                Lightning = 6, // 雷 / 电
-                Wind = 7, // 风
-                Earth = 8, // 地 / 土
-                Light = 9, //  光 / 圣
-                Dark = 10, //  暗 / 邪
-                Nature = 11, // 自然 (木)
+                Metal = 3, // 金 
+                Wood = 4, // 木 
+                Water = 5, // 水
+                Fire = 6, // 火
+                Earth = 7, // 土/地
+                Wind = 8, // 风
+                Lightning = 9, // 雷 / 电 
+                Light = 10, // 光 / 圣
+                Dark = 11, // 暗 / 邪
                 Poison = 12, // 毒 (或 Toxin)
-                Oil = 13; // 油
+                Oil = 13, //  油，易燃，易爆 
+                Ice = 14; // 冰
 
         public static bool IsElemental(int damageType)
         {
-            return damageType >= Fire && damageType <= Dark;
+            return damageType is >= Metal and <= Ice;
         }
 
-        public static ElementType ToElementalType(int damageType)
+        public static ElementType ToElement(int damageType)
         {
-            return (ElementType)(damageType - Magical);
+            return (ElementType)damageType;
         }
     }
 
@@ -73,7 +74,7 @@ namespace ET
         /// <summary>是否可暴击,1可以</summary>
         public bool CanCrit { get; set; }
         /// <summary>吸血比例</summary>
-        public double LifestealRate { get; set; }
+        public double LifeStealRate { get; set; }
         
          // Result
          public float BaseDamage { get; set; }

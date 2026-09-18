@@ -26,5 +26,10 @@ namespace ET
         {
             await DoRemoveBuff(buffComponent, buff);
         }
+        
+        public override bool CanHandleBuff(BuffType buffType)
+        {
+            return (buffType & BuffType.Control) == BuffType.Control;
+        }
     }
 }
