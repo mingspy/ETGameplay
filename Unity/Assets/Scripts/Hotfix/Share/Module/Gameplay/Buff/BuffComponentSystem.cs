@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace ET
 {
@@ -18,8 +17,11 @@ namespace ET
         [EntitySystem]
         private static void Update(this BuffComponent self)
         {
-            if (self.Buffs.Count == 0) return;
-            
+            if (self.Buffs.Count == 0)
+            {
+                return;
+            }
+
             // 每帧检查过期Buff，TODO: 后续改成用 TimerComponent 定时器完成。
             long now = TimeHelper.Now();
             var expiredKeys = new List<int>();
@@ -64,20 +66,32 @@ namespace ET
             return false;
         }
 
-        public static int AddBuff(this BuffComponent self, long casterId, int buffId )
+        /// <summary>
+        ///     从配置文件添加buff
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="casterId"></param>
+        /// <param name="buffId"></param>
+        /// <returns></returns>
+        public static BuffDataBase AddBuff(this BuffComponent self, long casterId, int buffId)
         {
             BuffConfig config = BuffConfigCategory.Instance.Get(buffId);
-            if (config == null)
-            {
-                return -1;
-            }
+
             BuffDataBase buff = BuffFactory.Instance.CreateBuff((BuffType)config.BuffType);
             buff.CasterId = casterId;
             buff.BuffConfig = config;
             return self.AddBuff(buff);
         }
 
-        public static int AddBuff(this BuffComponent self, long casterId, BuffType buffType, long durationMs)
+        /// <summary>
+        ///     通过BuffType添加buff，如Control buff
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="casterId"></param>
+        /// <param name="buffType"></param>
+        /// <param name="durationMs"></param>
+        /// <returns></returns>
+        public static BuffDataBase AddBuff(this BuffComponent self, long casterId, BuffType buffType, long durationMs)
         {
             BuffDataBase buff = BuffFactory.Instance.CreateBuff(buffType);
             buff.Duration = TimeHelper.ToMS(durationMs);
@@ -85,28 +99,35 @@ namespace ET
             return self.AddBuff(buff);
         }
 
-        public static int AddBuff(this BuffComponent self, BuffDataBase buff)
+        /// <summary>
+        ///     添加自定义buff
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="buff"></param>
+        /// <returns></returns>
+        public static BuffDataBase AddBuff(this BuffComponent self, BuffDataBase buff)
         {
             if (buff == null)
             {
                 Log.Error($"input buff is null");
-                return -1;
+                return null;
             }
-            
+
             IBuffRunner runner = BuffFactory.Instance.GetRunner(buff.GetType());
             if (runner == null)
             {
                 Log.Error($"{buff.GetType()} has not implement IBuffRunner");
-                return -1;
+                return null;
             }
-            
+
+            // 立即性buff，直接应用buff效果。
             if (buff.DurationType == BuffDurationType.Instant)
             {
                 runner.ApplyBuff(self, buff).Coroutine();
             }
             else
             {
-                
+                // 叠加buff
                 if (buff.BuffId > 0 && self.Buffs.TryGetValue(buff.BuffId, out BuffDataBase added))
                 {
                     // 同类型可叠加则叠加层数，不可叠加则刷新时间
@@ -120,21 +141,22 @@ namespace ET
                         added.EndTime = Math.Max(added.EndTime, buff.EndTime);
                     }
                 }
-                else
+                else // 新增buff
                 {
                     if (buff.BuffId <= 0)
                     {
                         buff.BuffId = self.GenId();
                     }
+
                     buff.Init(TimeHelper.Now());
                     self.Buffs[buff.BuffId] = buff;
-                    runner.ApplyBuff(self, buff).Coroutine();
+                    runner.AddBuff(self, buff).Coroutine();
                 }
             }
-            
+
             // 触发Buff添加事件，可用于更新UI或行为树条件
             EventSystem.Instance.PublishAsync(self.Scene(), new OnBuffAddedEvent() { Unit = self.GetParent<Unit>(), Buff = buff }).Coroutine();
-            return buff.BuffId;
+            return buff;
         }
 
         public static void RemoveBuff(this BuffComponent self, int buffId)
@@ -145,10 +167,10 @@ namespace ET
             }
 
             BuffFactory.Instance.GetRunner(buff.GetType()).RemoveBuff(self, buff).Coroutine();
- 
+
             EventSystem.Instance.PublishAsync(self.Scene(), new OnBuffRemovedEvent() { Unit = self.GetParent<Unit>(), Buff = buff }).Coroutine();
         }
-        
+
         private static void ExpireBuff(this BuffComponent self, int buffId)
         {
             if (!self.Buffs.Remove(buffId, out BuffDataBase buff))
@@ -157,15 +179,19 @@ namespace ET
             }
 
             BuffFactory.Instance.GetRunner(buff.GetType()).ExpiredBuff(self, buff).Coroutine();
- 
+
             EventSystem.Instance.PublishAsync(self.Scene(), new OnBuffExpiredEvent() { Unit = self.GetParent<Unit>(), Buff = buff }).Coroutine();
         }
-        
 
+        /// <summary>
+        ///     删除指定类型的所有buff
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="buffType"></param>
         public static void RemoveBuffs(this BuffComponent self, BuffType buffType)
         {
             var expiredKeys = new List<int>();
-            foreach (var buff in self.Buffs.Values)
+            foreach (BuffDataBase buff in self.Buffs.Values)
             {
                 if (buff.Type == buffType)
                 {

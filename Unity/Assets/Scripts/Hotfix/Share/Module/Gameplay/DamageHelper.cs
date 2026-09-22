@@ -8,9 +8,8 @@ namespace ET
     {
         #region 伤害处理
 
-
         /// <summary>
-        /// TODO: 获取用户状态，可以专门搞一个组件管理用户状态。
+        ///     TODO: 获取用户状态，可以专门搞一个组件管理用户状态。
         /// </summary>
         /// <param name="unit"></param>
         /// <returns></returns>
@@ -19,9 +18,9 @@ namespace ET
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
-        /// TODO: 应用技能前，要先检查目标状态，无敌 等。
+        ///     TODO: 应用技能前，要先检查目标状态，无敌 等。
         /// </summary>
         /// <param name="attacker"></param>
         /// <param name="target"></param>
@@ -103,8 +102,8 @@ namespace ET
         }
 
         /// <summary>
-        ///     根据攻击者和受害者的防御，穿刺，元素伤害等计算最终伤害。 <br/>
-        /// TODO: 暂时未考虑全局BUFF效果， 考虑全局BUFF
+        ///     根据攻击者和受害者的防御，穿刺，元素伤害等计算最终伤害。 <br />
+        ///     TODO: 暂时未考虑全局BUFF效果， 考虑全局BUFF
         /// </summary>
         /// <param name="attacker">攻击者</param>
         /// <param name="target">受击者</param>

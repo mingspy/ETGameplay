@@ -65,6 +65,8 @@ namespace ET
 		public string Name { get; set; }
 		/// <summary>描述</summary>
 		public string Description { get; set; }
+		/// <summary>BuffType</summary>
+		public int BuffType { get; set; }
 		/// <summary>最多叠加层数</summary>
 		public int MaxStacks { get; set; }
 		/// <summary>持续类型0:Instant,1:Infinit,2:hasDuration</summary>
@@ -73,12 +75,10 @@ namespace ET
 		public int Duration { get; set; }
 		/// <summary>周期性, 0为没有，单位毫秒</summary>
 		public int Period { get; set; }
-		/// <summary>BuffType</summary>
-		public uint BuffType { get; set; }
 		/// <summary>修改的属性</summary>
 		public int[] Numerics { get; set; }
-		/// <summary>效果数值, int 属性等于原来值，float 值 * 10000</summary>
-		public int[] EffectValues { get; set; }
+		/// <summary>修改的值, int 属性设置成原来值；float 值需要 * 10000，比如0.5，这里设置成5000</summary>
+		public int[] NumericValues { get; set; }
 
 	}
 }

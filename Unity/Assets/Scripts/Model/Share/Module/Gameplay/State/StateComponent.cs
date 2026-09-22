@@ -29,27 +29,5 @@ namespace ET
         public State State {get;set;}
     }
     
-    /// <summary>
-    /// 派发冻结事件（UI/特效/被动）
-    /// </summary>
-    public struct FrozenEvent
-    {
-        public Unit Target { get; set; }
-        /// <summary>
-        /// 冻结时间，单位秒
-        /// </summary>
-        public float Duration { get; set; }
-    }
-    
-    /// <summary>
-    /// 区分冰冻的原因是，冰冻可以有元素反应。
-    /// </summary>
-    public struct StunnedEvent
-    {
-        public Unit Target { get; set; }
-        /// <summary>
-        /// 冻结时间，单位秒
-        /// </summary>
-        public float Duration { get; set; }
-    }
+
 }

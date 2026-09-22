@@ -9,7 +9,8 @@ namespace ET
         {
         }
 
-        /// 穿戴装备
+        /// <summary>
+        ///     穿戴装备
         /// </summary>
         public static void WearEquip(this EquipComponent self, EquipConfig config)
         {
@@ -30,25 +31,36 @@ namespace ET
             // 叠加所有装备的基础属性
             for (int i = 0; i < config.Numerics.Length; i++)
             {
-                numeric[config.Numerics[i]] += config.EffectValues[i];
+                numeric[config.Numerics[i]] += config.NumericValues[i];
             }
 
             // TODO: 实现附加效果Buff，根据Buff类型，添加监听器。
+            BuffComponent buffComponent = self.GetParent<Unit>().GetComponent<BuffComponent>();
+            foreach (int buffId in config.BuffIds)
+            {
+                buffComponent.AddBuff(self.Id, buffId);
+            }
         }
 
-        /// 脱下装备
+        /// <summary>
+        ///     脱下装备
         /// </summary>
         public static void RemoveEquip(this EquipComponent self, int slot)
         {
-            if (self.Equips.TryGetValue(slot, out EquipConfig config))
+            if (self.Equips.Remove(slot, out EquipConfig config))
             {
-                self.Equips.Remove(slot);
                 NumericComponent numeric = self.GetParent<Unit>().GetComponent<NumericComponent>();
 
                 // 叠加所有装备的基础属性
                 for (int i = 0; i < config.Numerics.Length; i++)
                 {
-                    numeric[config.Numerics[i]] -= config.EffectValues[i];
+                    numeric[config.Numerics[i]] -= config.NumericValues[i];
+                }
+
+                BuffComponent buffComponent = self.GetParent<Unit>().GetComponent<BuffComponent>();
+                foreach (int buffId in config.BuffIds)
+                {
+                    buffComponent.RemoveBuff(buffId);
                 }
             }
         }

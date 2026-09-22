@@ -1,7 +1,7 @@
 {"dict": [
-[100, {"_t":"BuffConfig","_id":100,"Name":"减血Buff","Description":"持续减血","MaxStacks":5,"DurationType":2,"Duration":5000,"Period":0,"BuffType":0,"Numerics":[1001],"EffectValues":[-100]}],
-[111, {"_t":"BuffConfig","_id":111,"Name":"减蓝Buff","Description":"一次性减蓝","MaxStacks":5,"DurationType":0,"Duration":0,"Period":0,"BuffType":0,"Numerics":[1002],"EffectValues":[100]}],
-[222, {"_t":"BuffConfig","_id":222,"Name":"增血Buff","Description":"持续增血","MaxStacks":3,"DurationType":2,"Duration":5000,"Period":0,"BuffType":0,"Numerics":[1001],"EffectValues":[50]}],
-[3, {"_t":"BuffConfig","_id":3,"Name":"眩晕","Description":"眩晕3秒","MaxStacks":1,"DurationType":2,"Duration":3000,"Period":0,"BuffType":8,"Numerics":[],"EffectValues":[]}],
-[2, {"_t":"BuffConfig","_id":2,"Name":"无敌","Description":"无敌1秒","MaxStacks":1,"DurationType":2,"Duration":2000,"Period":0,"BuffType":4,"Numerics":[],"EffectValues":[]}]
+[0, {"_t":"BuffConfig","_id":0,"Name":"占位buff","Description":"禁止使用，ID 0有特殊意义。这里展示用法。立刻修改int 属性-1增 加  100；float属性-2 减少 0.5","BuffType":1,"MaxStacks":0,"DurationType":0,"Duration":0,"Period":0,"Numerics":[-1,-2],"NumericValues":[100,-5000]}],
+[257, {"_t":"BuffConfig","_id":257,"Name":"眩晕","Description":"眩晕3秒","BuffType":257,"MaxStacks":3,"DurationType":2,"Duration":3000,"Period":0,"Numerics":[],"NumericValues":[]}],
+[259, {"_t":"BuffConfig","_id":259,"Name":"无敌","Description":"无敌1秒","BuffType":259,"MaxStacks":10,"DurationType":2,"Duration":1000,"Period":0,"Numerics":[],"NumericValues":[]}],
+[261, {"_t":"BuffConfig","_id":261,"Name":"冰冻Debuff","Description":"被施加者冰冻3秒","BuffType":261,"MaxStacks":1,"DurationType":2,"Duration":3000,"Period":0,"Numerics":[],"NumericValues":[]}],
+[12093, {"_t":"BuffConfig","_id":12093,"Name":"超导Debuff","Description":"冰雷反应，减雷抗百分比20%","BuffType":1,"MaxStacks":1,"DurationType":2,"Duration":4000,"Period":0,"Numerics":[12093],"NumericValues":[-2000]}]
 ]}

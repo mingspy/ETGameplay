@@ -1,42 +1,48 @@
 namespace ET
 {
     [BuffRunner]
-    public class NumericBuffRunner: ABuffRunner<NumericBuff>
+    public class NumericBuffRunner : ABuffRunner<NumericBuff>
     {
-        protected override async ETTask DoApplyBuffEffect(BuffComponent buffComponent, BuffDataBase buff)
+        protected override async ETTask OnAddBuff(BuffComponent buffComponent, BuffDataBase buff)
         {
+            await this.OnApplyBuffEffect(buffComponent, buff);
+        }
+
+        protected override async ETTask OnApplyBuffEffect(BuffComponent buffComponent, BuffDataBase buff)
+        {
+            NumericBuff numericBuff = buff as NumericBuff;
             NumericComponent NumericComponent = buffComponent.GetParent<Unit>().GetComponent<NumericComponent>();
-            NumericBuff _buff = buff as NumericBuff;
-            for (int i = 0; i < _buff.Numerics.Length; i++)
+            for (int i = 0; i < numericBuff.Numerics.Length; i++)
             {
-                NumericComponent[_buff.Numerics[i]] += _buff.NumericValues[i];
-                _buff.TotalEffects[i] += _buff.NumericValues[i];
+                NumericComponent[numericBuff.Numerics[i]] += numericBuff.NumericValues[i];
+                numericBuff.TotalEffects[i] += numericBuff.NumericValues[i];
             }
-            
+
             await ETTask.CompletedTask;
         }
 
-        protected override async ETTask DoTickBuff(BuffComponent buffComponent, BuffDataBase buff, long currentTimeMs)
+        protected override async ETTask OnTickBuff(BuffComponent buffComponent, BuffDataBase buff, long currentTimeMs)
         {
             await ETTask.CompletedTask;
         }
 
-        protected override async ETTask DoRemoveBuff(BuffComponent buffComponent, BuffDataBase buff)
+        protected override async ETTask OnRemoveBuff(BuffComponent buffComponent, BuffDataBase buff)
         {
+            NumericBuff numericBuff = buff as NumericBuff;
             NumericComponent NumericComponent = buffComponent.GetParent<Unit>().GetComponent<NumericComponent>();
-            NumericBuff _buff = buff as NumericBuff;
-            for (int i = 0; i < _buff.Numerics.Length; i++)
+            for (int i = 0; i < numericBuff.Numerics.Length; i++)
             {
-                NumericComponent[_buff.Numerics[i]] -= _buff.TotalEffects[i];
+                NumericComponent[numericBuff.Numerics[i]] -= numericBuff.TotalEffects[i];
             }
+
             await ETTask.CompletedTask;
         }
 
-        protected override async ETTask DoExpiredBuff(BuffComponent buffComponent, BuffDataBase buff)
+        protected override async ETTask OnExpiredBuff(BuffComponent buffComponent, BuffDataBase buff)
         {
-            await DoRemoveBuff(buffComponent, buff);
+            await this.OnRemoveBuff(buffComponent, buff);
         }
-        
+
         public override bool CanHandleBuff(BuffType buffType)
         {
             return buffType == BuffType.Numeric;

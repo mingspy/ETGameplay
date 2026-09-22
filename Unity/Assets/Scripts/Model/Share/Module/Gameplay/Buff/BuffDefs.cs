@@ -31,34 +31,6 @@ namespace ET
         Equip= 1 << 12, // 装备
         Rune= 1 << 13,// 符文
     }
-
-    // 运行时BUFF实例
-    public class BuffInstance : ETObject
-    {
-        public int BuffId { get; set; }
-        public long OwnerId { get; set; } // BUFF持有者
-        public long CasterId { get; set; } // 施加者
-
-        /// <summary>
-        ///     开始时间，单位毫秒数，以下都为毫秒。
-        /// </summary>
-        public long StartTime { get; set; }
-
-        public long EndTime { get; set; }
-        public long PeriodEndTime { get; set; }
-        /// <summary>
-        /// 当前BUFF的层数
-        /// </summary>
-        public int Stacks { get; set; }
-        /// <summary>
-        /// 最高层数，默认1。 如果是0，表示立即执行的BUFF，不会添加到BuffSystem中管理
-        /// </summary>
-        public int MaxStacks { get; set; }
-
-        public int[] TotalEffects { get; set; } // 总伤害，int类型等于原始值，float * 10000
-
-        public BuffConfig Config { get; set; } // 引用静态配置
-    }
     
     [EnableClass]
     public abstract class BuffDataBase

@@ -29,7 +29,7 @@ namespace ET
             if (config != null)
             {
                 this.Numerics =  config.Numerics;
-                this.NumericValues = config.EffectValues;
+                this.NumericValues = config.NumericValues;
             }
             if(this.Numerics != null) this.TotalEffects = new int[this.Numerics.Length];
         }

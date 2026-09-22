@@ -59,32 +59,5 @@ namespace ET
         /// </summary>
         public float DefaultSpreadRadius { get; set; } = 3.5f;
     }
-    /// <summary>
-    /// 超载：火雷反应，额外范围伤害+小击退
-    /// </summary>
-    public struct OverloadEvent
-    {
-        public Unit Target { get; set; }
-        public float KnockbackDistance { get; set; }
-        public float AoeRadius { get; set; }
-        public float Damage { get; set; }
-    }
 
-    /// <summary>
-    /// 超导：冰雷反应，雷元素攻击冰属性，减雷抗
-    /// </summary>
-    public struct SuperConductEvent
-    {
-        public Unit Target { get; set; }
-        public float ResistanceReduction  { get; set; }
-        public float Duration { get; set; }
-    }
-
-    public struct SwirlEvent
-    {
-        public Unit Caster  { get; set; }
-        public ElementType SpreadElement  { get; set; }
-        public float Radius { get; set; } 
-        public List<long> AffectedUnits{ get; set; }
-    }
 }

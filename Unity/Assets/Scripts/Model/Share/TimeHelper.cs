@@ -70,7 +70,7 @@ public static class TimeHelper
         return (long)(seconds * OneSecond);
     }
     
-    public static float MsToSec(long ms)
+    public static float MSToSec(long ms)
     {
         return ms / (float)OneSecond;
     }

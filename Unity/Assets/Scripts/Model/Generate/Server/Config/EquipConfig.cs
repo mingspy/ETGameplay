@@ -66,13 +66,13 @@ namespace ET
 		/// <summary>描述</summary>
 		public string Description { get; set; }
 		/// <summary>类型</summary>
-		public int EquiqType { get; set; }
+		public int EquipType { get; set; }
 		/// <summary>槽位</summary>
 		public int Slot { get; set; }
 		/// <summary>修改的属性</summary>
 		public int[] Numerics { get; set; }
 		/// <summary>效果数值, int 属性等于原来值，float 值 * 10000</summary>
-		public int[] EffectValues { get; set; }
+		public int[] NumericValues { get; set; }
 		/// <summary>装备的附加效果，如减速，元素</summary>
 		public int[] BuffIds { get; set; }
 

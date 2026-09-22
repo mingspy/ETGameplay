@@ -82,7 +82,7 @@ namespace ET
 		/// <summary>反应后附加元素的持续时间，单位毫秒。如果一直燃烧，直到结束，设置一个较大值。</summary>
 		public int Duration { get; set; }
 		/// <summary>反应后附加的BUFF，比如持续伤害，持续周边AOE，持续蔓延。</summary>
-		public int[] ApplyBuffs { get; set; }
+		public int[] BuffIds { get; set; }
 		/// <summary>VFX效果名称</summary>
 		public string VfxName { get; set; }
 

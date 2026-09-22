@@ -30,12 +30,14 @@ namespace ET
 
         public IBuffRunner GetRunner(Type buffDataType)
         {
+            
             if (this.allBuffRuners.TryGetValue(buffDataType, out var  runner))
             {
-                return runner;
+                return runner ;
             }
 
-            return (from kvp in this.allBuffRuners where buffDataType.IsSubclassOf(kvp.Key) select kvp.Value).FirstOrDefault();
+            IBuffRunner baseRunner = (from kvp in this.allBuffRuners where buffDataType.IsSubclassOf(kvp.Key) select kvp.Value).FirstOrDefault();
+            return baseRunner;
         }
         
     }
