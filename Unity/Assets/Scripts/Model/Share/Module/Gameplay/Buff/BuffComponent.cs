@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using MemoryPack;
 using MongoDB.Bson.Serialization.Attributes;
@@ -16,37 +17,107 @@ namespace ET
     [ComponentOf(typeof(Unit))]
     public class BuffComponent : Entity, IAwake, IUpdate
     {
-        public Dictionary<int, BuffDataBase> Buffs { get; set; } = new Dictionary<int, BuffDataBase>(capacity: 10);
-        
-        [BsonElement]
-        [MemoryPackInclude]
-        private int idGenerator = 10000000;
+        // 所有Buff节点字典，Key: Buff实例ID，不需要，直接操作 this.Children
+        //public Dictionary<long, EntityRef<BuffNode>> Buffs = new Dictionary<long, EntityRef<BuffNode>>();
+
+        private SortedDictionary<int, List<long>> buffsByConfigId;
+        /// <summary>
+        /// 按配置ID索引的Buff列表，用于快速查找同类型Buff
+        /// Key: BuffConfigId, Value: BuffNode列表
+        /// </summary>
+        public SortedDictionary<int, List<long>> BuffsByConfigId 
+        {
+            get
+            {
+                return this.buffsByConfigId ??= ObjectPool.Instance.Fetch<SortedDictionary<int, List<long>>>();
+            }
+        }
+
+        private SortedDictionary<string, List<long>> buffsByTag;
+        /// <summary>
+        /// 按标签索引的Buff列表，用于驱散
+        /// Key: Tag名称, Value: BuffNode列表
+        /// </summary>
+        public SortedDictionary<string, List<long>> BuffsByTag 
+        {
+            get
+            {
+                return this.buffsByTag ??= ObjectPool.Instance.Fetch<SortedDictionary<string, List<long>>>();
+            }
+        }
+
+        private List<long> updateBuffs;
+        /// <summary>
+        /// 需要每帧更新的Buff列表（Duration、IntervalTick类型）
+        /// 轮询驱动只遍历这个列表，性能更好
+        /// </summary>
+        public List<long> UpdateBuffs 
+        {
+            get
+            {
+                return this.updateBuffs ??= ObjectPool.Instance.Fetch<List<long>>();
+            }
+        }
+
+        private SortedDictionary<BuffEventType, List<long>> eventBuffs;
 
         /// <summary>
-        /// 构造BuffId
+        /// 监听事件的Buff字典
+        /// Key: 事件类型, Value: 监听该事件的Buff列表
+        /// 事件驱动时直接查找这个字典，不需要遍历所有Buff
         /// </summary>
-        /// <returns></returns>
-        public int GenId()
+        public SortedDictionary<BuffEventType, List<long>> EventBuffs
         {
-            return ++idGenerator;
+            get
+            {
+                return this.eventBuffs ??= ObjectPool.Instance.Fetch<SortedDictionary<BuffEventType, List<long>>>();
+            }
         }
-    }
 
-    public struct OnBuffAddedEvent
-    {
-        public Unit Unit;
-        public BuffDataBase Buff;
-    }
+        public override void Dispose()
+        {
+            if (this.IsDisposed)
+            {
+                return;
+            }
 
-    public struct OnBuffRemovedEvent
-    {
-        public Unit Unit;
-        public BuffDataBase Buff;
-    }
-    
-    public struct OnBuffExpiredEvent
-    {
-        public Unit Unit;
-        public BuffDataBase Buff;
+            base.Dispose();
+
+            if (this.buffsByConfigId != null)
+            {
+                this.buffsByConfigId.Clear();
+                ObjectPool.Instance.Recycle(this.buffsByConfigId);
+                this.buffsByConfigId =  null;
+            }
+            
+            if (this.buffsByTag != null)
+            {
+                this.buffsByTag.Clear();
+                ObjectPool.Instance.Recycle(this.buffsByTag);
+                this.buffsByTag =  null;
+            }
+            
+            if (this.updateBuffs != null)
+            {
+                this.updateBuffs.Clear();
+                ObjectPool.Instance.Recycle(this.updateBuffs);
+                this.updateBuffs =  null;
+            }
+
+            if (this.eventBuffs != null)
+            {
+                this.eventBuffs.Clear();
+                ObjectPool.Instance.Recycle(this.eventBuffs);
+                this.eventBuffs =  null;
+            }
+            
+        }
+
+        private void RecycleToPool(object obj)
+        {
+            if (obj == null) return;
+            ObjectPool.Instance.Recycle(obj);
+            obj = null;
+        }
     }
 }

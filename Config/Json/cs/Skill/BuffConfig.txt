@@ -1,7 +1,7 @@
 {"dict": [
-[0, {"_t":"BuffConfig","_id":0,"Name":"占位buff","Description":"禁止使用，ID 0有特殊意义。这里展示用法。立刻修改int 属性-1增 加  100；float属性-2 减少 0.5","BuffType":1,"MaxStacks":0,"DurationType":0,"Duration":0,"Period":0,"Numerics":[-1,-2],"NumericValues":[100,-5000]}],
-[257, {"_t":"BuffConfig","_id":257,"Name":"眩晕","Description":"眩晕3秒","BuffType":257,"MaxStacks":3,"DurationType":2,"Duration":3000,"Period":0,"Numerics":[],"NumericValues":[]}],
-[259, {"_t":"BuffConfig","_id":259,"Name":"无敌","Description":"无敌1秒","BuffType":259,"MaxStacks":10,"DurationType":2,"Duration":1000,"Period":0,"Numerics":[],"NumericValues":[]}],
-[261, {"_t":"BuffConfig","_id":261,"Name":"冰冻Debuff","Description":"被施加者冰冻3秒","BuffType":261,"MaxStacks":1,"DurationType":2,"Duration":3000,"Period":0,"Numerics":[],"NumericValues":[]}],
-[12093, {"_t":"BuffConfig","_id":12093,"Name":"超导Debuff","Description":"冰雷反应，减雷抗百分比20%","BuffType":1,"MaxStacks":1,"DurationType":2,"Duration":4000,"Period":0,"Numerics":[12093],"NumericValues":[-2000]}]
+[0, {"_t":"BuffConfig","_id":0,"Name":"占位buff","Description":"禁止使用，ID 0有特殊意义。这里展示用法。立刻修改int 属性-1增 加  100；float属性-2 减少 0.5","BuffType":1,"Tags":["Test1","Test2"],"MaxStack":0,"Duration":0,"Interval":0,"Numerics":[-1,-2],"NumericValues":[100,-5000],"ListenEvents":[]}],
+[8193, {"_t":"BuffConfig","_id":8193,"Name":"眩晕","Description":"眩晕3秒","BuffType":8193,"Tags":["Stunned"],"MaxStack":3,"Duration":3000,"Interval":0,"Numerics":[],"NumericValues":[],"ListenEvents":[]}],
+[8195, {"_t":"BuffConfig","_id":8195,"Name":"无敌","Description":"无敌1秒","BuffType":8195,"Tags":["Invincible"],"MaxStack":10,"Duration":1000,"Interval":0,"Numerics":[],"NumericValues":[],"ListenEvents":[]}],
+[8197, {"_t":"BuffConfig","_id":8197,"Name":"冰冻Debuff","Description":"被施加者冰冻3秒","BuffType":8197,"Tags":["Frozen"],"MaxStack":1,"Duration":3000,"Interval":0,"Numerics":[],"NumericValues":[],"ListenEvents":[]}],
+[12093, {"_t":"BuffConfig","_id":12093,"Name":"超导Debuff","Description":"冰雷反应，减雷抗百分比20%","BuffType":128,"Tags":[],"MaxStack":1,"Duration":4000,"Interval":0,"Numerics":[12093],"NumericValues":[-2000],"ListenEvents":[]}]
 ]}

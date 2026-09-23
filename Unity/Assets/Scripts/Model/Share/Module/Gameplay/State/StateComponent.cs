@@ -17,7 +17,8 @@ namespace ET
         SuperArmor = 1 << 8, // 霸体（免疫控制）
         Enhanced = 1 << 9, // 强化状态
         IsCasting = Attacking | Casting,
-        Abnormal = Stunned | Dead
+        Abnormal = Stunned | Dead,
+        NotCastable = Dead | Stunned | Frozen | IsCasting,
         
     }
     /// <summary>

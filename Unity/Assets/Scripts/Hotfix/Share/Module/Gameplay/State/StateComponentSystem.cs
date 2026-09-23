@@ -25,7 +25,7 @@ namespace ET
         public static void Unfreeze(this StateComponent self)
         {
             BuffComponent buffComponent = self.GetParent<Unit>().GetComponent<BuffComponent>();
-            buffComponent.RemoveBuffs(BuffType.Frozen);
+            buffComponent.DispelByTag(nameof(BuffType.Frozen));
             self.RemoveState(State.Frozen);
         }
 
@@ -44,7 +44,7 @@ namespace ET
         public static void Unstun(this StateComponent self)
         {
             BuffComponent buffComponent = self.GetParent<Unit>().GetComponent<BuffComponent>();
-            buffComponent.RemoveBuffs(BuffType.Stunned);
+            buffComponent.DispelByTag(nameof(BuffType.Stunned));
             self.RemoveState(State.Stunned);
         }
 
@@ -66,6 +66,11 @@ namespace ET
         public static void ClearState(this StateComponent self)
         {
             self.State = State.Idle;
+        }
+
+        public static bool CanCast(this StateComponent self)
+        {
+            return (self.State & State.NotCastable) == 0;
         }
     }
 }

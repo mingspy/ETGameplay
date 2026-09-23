@@ -67,18 +67,20 @@ namespace ET
 		public string Description { get; set; }
 		/// <summary>BuffType</summary>
 		public int BuffType { get; set; }
+		/// <summary>Tags</summary>
+		public string[] Tags { get; set; }
 		/// <summary>最多叠加层数</summary>
-		public int MaxStacks { get; set; }
-		/// <summary>持续类型0:Instant,1:Infinit,2:hasDuration</summary>
-		public int DurationType { get; set; }
+		public int MaxStack { get; set; }
 		/// <summary>持续时间 单位毫秒</summary>
 		public int Duration { get; set; }
 		/// <summary>周期性, 0为没有，单位毫秒</summary>
-		public int Period { get; set; }
+		public int Interval { get; set; }
 		/// <summary>修改的属性</summary>
 		public int[] Numerics { get; set; }
 		/// <summary>修改的值, int 属性设置成原来值；float 值需要 * 10000，比如0.5，这里设置成5000</summary>
 		public int[] NumericValues { get; set; }
+		/// <summary>监听的事件id</summary>
+		public int[] ListenEvents { get; set; }
 
 	}
 }

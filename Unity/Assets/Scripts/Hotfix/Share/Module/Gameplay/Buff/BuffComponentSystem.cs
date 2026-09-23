@@ -5,204 +5,578 @@ namespace ET
 {
     [EntitySystemOf(typeof(BuffComponent))]
     [FriendOf(typeof(BuffComponent))]
+    [FriendOf(typeof(BuffNode))]
     public static partial class BuffComponentSystem
     {
+        #region System
         [EntitySystem]
         private static void Awake(this BuffComponent self)
         {
             int cnt = BuffConfigCategory.Instance.GetAll().Count;
             Log.Info($"BuffComponentSystem  Awake, total BuffCount: {cnt} IScene {self.Scene()} {self.Fiber()} AppType {Options.Instance.AppType}");
+            self.BuffsByConfigId.Clear();
+            self.BuffsByTag.Clear();
+            self.UpdateBuffs.Clear();
+            self.EventBuffs.Clear();
         }
-
+        
+        /// <summary>
+        /// 每帧更新 - 轮询驱动入口
+        /// 只遍历需要Update的Buff（UpdateBuffs列表），不需要遍历所有Buff
+        /// </summary>
         [EntitySystem]
-        private static void Update(this BuffComponent self)
+        public static void Update(this BuffComponent self)
         {
-            if (self.Buffs.Count == 0)
+            long deltaTime = TimeHelper.DeltaTime;
+            if (self.UpdateBuffs.Count == 0)
             {
                 return;
             }
 
-            // 每帧检查过期Buff，TODO: 后续改成用 TimerComponent 定时器完成。
-            long now = TimeHelper.Now();
-            var expiredKeys = new List<int>();
-            foreach (var kvp in self.Buffs)
+            // 冷却时间更新 - 遍历所有Buff更新冷却？不，只更新UpdateBuffs里的
+            // 实际上冷却也可以用事件驱动，这里简化处理：冷却在Update中更新
+            List<long> toRemove = new List<long>();
+
+            foreach (long buffId in self.UpdateBuffs)
             {
-                BuffDataBase buff = kvp.Value;
-                IBuffRunner runner = BuffFactory.Instance.GetRunner(buff.GetType());
-                runner.TickBuff(self, buff, now).Coroutine();
-                // 检查周期性
-                if (buff.Period > 0 && now >= buff.PeriodEndTime)
+                BuffNode buffNode  = self.GetChild<BuffNode>(buffId);
+                //if (!self.Buffs.TryGetValue(buffId, out BuffNode buffNode))
+                if (buffNode == null)
                 {
-                    runner.ApplyBuff(self, buff).Coroutine();
-                    buff.PeriodEndTime = now + buff.Period;
+                    toRemove.Add(buffId);
+                    continue;
                 }
 
-                // 检查过期
-                if (buff.DurationType == BuffDurationType.HasDuration && now >= buff.EndTime)
+                if (!buffNode.IsActive)
                 {
-                    expiredKeys.Add(kvp.Key);
+                    continue;
+                }
+
+                // 更新已存在时间
+                buffNode.ElapsedTime += deltaTime;
+
+                // 更新冷却
+                if (buffNode.CooldownRemaining > 0)
+                {
+                    buffNode.CooldownRemaining = Math.Max(0, buffNode.CooldownRemaining - deltaTime);
+                }
+
+                // 检查持续时间是否结束
+                if (buffNode.Duration > 0 && buffNode.ElapsedTime >= buffNode.Duration)
+                {
+                    toRemove.Add(buffId);
+                    continue;
+                }
+
+                // 间隔触发检查
+                if (buffNode.HasType(BuffType.IntervalTick) && buffNode.Interval > 0)
+                {
+                    buffNode.LastTickTime += deltaTime;
+                    if (buffNode.LastTickTime >= buffNode.Interval)
+                    {
+                        buffNode.LastTickTime = 0;
+                        self.OnIntervalTick(buffNode);
+                    }
                 }
             }
 
-            foreach (int key in expiredKeys)
+            // 移除到期的Buff
+            foreach (long buffId in toRemove)
             {
-                self.ExpireBuff(key);
+                self.RemoveBuff(buffId);
             }
         }
+        #endregion
+        
 
-        public static bool HasBuff(this BuffComponent self, int buffId)
-        {
-            if (self.Buffs.TryGetValue(buffId, out BuffDataBase info))
-            {
-                if (TimeHelper.Now() < info.EndTime)
-                {
-                    return true;
-                }
-
-                // 过期移除
-                self.Buffs.Remove(buffId);
-            }
-
-            return false;
-        }
-
+        
         /// <summary>
-        ///     从配置文件添加buff
+        /// 添加Buff - 核心入口方法
+        /// </summary>
+        /// <param name="self">BuffComponent</param>
+        /// <param name="configId">Buff配置ID</param>
+        /// <param name="sourceId">来源实体ID</param>
+        /// <param name="duration">持续时间，0表示永久</param>
+        /// <param name="sourceType">来源类型</param>
+        /// <returns>添加的BuffNode实例</returns>
+        public static BuffNode AddBuff(this BuffComponent self, long sourceId, int configId,  long duration, BuffSourceType sourceType)
+        {
+            Unit owner = self.GetParent<Unit>();
+            
+            // 创建BuffNode实例
+            BuffNode buffNode = self.AddChild<BuffNode>();
+            buffNode.Init(configId);
+            buffNode.SourceId = sourceId;
+            buffNode.TargetId = owner.Id;
+            buffNode.Duration = duration;
+            buffNode.SourceType = sourceType;
+            
+            return self.AddBuff(buffNode);
+        }
+        
+        /// <summary>
+        /// 完全通过Buff ConfigId添加
         /// </summary>
         /// <param name="self"></param>
-        /// <param name="casterId"></param>
-        /// <param name="buffId"></param>
+        /// <param name="sourceId"></param>
+        /// <param name="configId"></param>
         /// <returns></returns>
-        public static BuffDataBase AddBuff(this BuffComponent self, long casterId, int buffId)
+        public static BuffNode AddBuff(this BuffComponent self, long sourceId, int configId)
         {
-            BuffConfig config = BuffConfigCategory.Instance.Get(buffId);
-
-            BuffDataBase buff = BuffFactory.Instance.CreateBuff((BuffType)config.BuffType);
-            buff.CasterId = casterId;
-            buff.BuffConfig = config;
-            return self.AddBuff(buff);
+            Unit owner = self.GetParent<Unit>();
+            
+            // 创建BuffNode实例
+            BuffNode buffNode = self.AddChild<BuffNode>();
+            buffNode.Init(configId);
+            buffNode.SourceId = sourceId;
+            buffNode.TargetId = owner.Id;
+            
+            return self.AddBuff(buffNode);
         }
-
+        
         /// <summary>
-        ///     通过BuffType添加buff，如Control buff
+        /// 临时测试用，后续改用前面几个方法。要求BuffType和ConfigId对应，并且在BuffConfig配置中存在。 如BuffId = BuffType.Stunned,Frozen,Invincible
         /// </summary>
         /// <param name="self"></param>
-        /// <param name="casterId"></param>
+        /// <param name="sourceId"></param>
         /// <param name="buffType"></param>
-        /// <param name="durationMs"></param>
+        /// <param name="duration"></param>
         /// <returns></returns>
-        public static BuffDataBase AddBuff(this BuffComponent self, long casterId, BuffType buffType, long durationMs)
+        public static BuffNode AddBuff(this BuffComponent self, long sourceId, BuffType buffType, long duration)
         {
-            BuffDataBase buff = BuffFactory.Instance.CreateBuff(buffType);
-            buff.Duration = TimeHelper.ToMS(durationMs);
-            buff.CasterId = casterId;
-            return self.AddBuff(buff);
+            Unit owner = self.GetParent<Unit>();
+            
+            // 创建BuffNode实例
+            BuffNode buffNode = self.AddChild<BuffNode>();
+            buffNode.Init((int)buffType);
+            buffNode.BuffType = buffType;
+            buffNode.SourceId = sourceId;
+            buffNode.TargetId = owner.Id;
+            buffNode.Duration = duration;
+            
+            return self.AddBuff(buffNode);
         }
 
-        /// <summary>
-        ///     添加自定义buff
-        /// </summary>
-        /// <param name="self"></param>
-        /// <param name="buff"></param>
-        /// <returns></returns>
-        public static BuffDataBase AddBuff(this BuffComponent self, BuffDataBase buff)
+        private static BuffNode AddBuff(this BuffComponent self, BuffNode buffNode)
         {
-            if (buff == null)
+            // 立即buff，直接添加，并返回
+            if (buffNode.HasType(BuffType.Instant) && buffNode.Duration <= 0)
             {
-                Log.Error($"input buff is null");
-                return null;
+                self.ApplyBuff(buffNode);
+                buffNode.Dispose();
+                return buffNode;
             }
+            
+            // 加入字典 暂时不需要，直接从children中获取
+            //self.Buffs.Add(buffNode.Id, buffNode);
+            int configId = buffNode.ConfigId;
 
-            IBuffRunner runner = BuffFactory.Instance.GetRunner(buff.GetType());
-            if (runner == null)
+            // 按ConfigId索引
+            if (!self.BuffsByConfigId.ContainsKey(configId))
             {
-                Log.Error($"{buff.GetType()} has not implement IBuffRunner");
-                return null;
+                self.BuffsByConfigId[configId] = new List<long>();
             }
-
-            // 立即性buff，直接应用buff效果。
-            if (buff.DurationType == BuffDurationType.Instant)
+            
+            self.BuffsByConfigId[configId].Add(buffNode.Id);
+            
+            /*
+            if (self.BuffsByConfigId[configId].Count < buffNode.MaxStack )
             {
-                runner.ApplyBuff(self, buff).Coroutine();
+                self.BuffsByConfigId[configId].Add(buffNode.Id);
             }
             else
             {
-                // 叠加buff
-                if (buff.BuffId > 0 && self.Buffs.TryGetValue(buff.BuffId, out BuffDataBase added))
+                // 更新buff的时间
+                foreach (long bid in self.BuffsByConfigId[configId])
                 {
-                    // 同类型可叠加则叠加层数，不可叠加则刷新时间
-                    if (added.Stacks < added.MaxStacks)
+                    BuffNode added = self.GetChild<BuffNode>(bid);
+                    if (added == null)
                     {
-                        added.Stacks += 1;
-                        runner.ApplyBuff(self, buff).Coroutine();
-                    }
-                    else
-                    {
-                        added.EndTime = Math.Max(added.EndTime, buff.EndTime);
-                    }
-                }
-                else // 新增buff
-                {
-                    if (buff.BuffId <= 0)
-                    {
-                        buff.BuffId = self.GenId();
+                        continue;
                     }
 
-                    buff.Init(TimeHelper.Now());
-                    self.Buffs[buff.BuffId] = buff;
-                    runner.AddBuff(self, buff).Coroutine();
+                    if (buffNode.Duration > added.Duration - added.ElapsedTime)
+                    {
+                        added.Duration = buffNode.Duration;
+                        added.ElapsedTime = 0;
+                        added.CooldownRemaining = 0;
+                    }
+
+                    buffNode.Dispose();
+                    return null;
                 }
             }
+            */
+            
 
-            // 触发Buff添加事件，可用于更新UI或行为树条件
-            EventSystem.Instance.PublishAsync(self.Scene(), new OnBuffAddedEvent() { Unit = self.GetParent<Unit>(), Buff = buff }).Coroutine();
-            return buff;
-        }
-
-        public static void RemoveBuff(this BuffComponent self, int buffId)
-        {
-            if (!self.Buffs.Remove(buffId, out BuffDataBase buff))
+            // 按标签索引
+            if (buffNode.Tags != null)
             {
-                return;
+                foreach (string tag in buffNode.Tags)
+                {
+                    if (!self.BuffsByTag.ContainsKey(tag))
+                    {
+                        self.BuffsByTag[tag] = new List<long>();
+                    }
+                    self.BuffsByTag[tag].Add(buffNode.Id);
+                }
             }
 
-            BuffFactory.Instance.GetRunner(buff.GetType()).RemoveBuff(self, buff).Coroutine();
-
-            EventSystem.Instance.PublishAsync(self.Scene(), new OnBuffRemovedEvent() { Unit = self.GetParent<Unit>(), Buff = buff }).Coroutine();
-        }
-
-        private static void ExpireBuff(this BuffComponent self, int buffId)
-        {
-            if (!self.Buffs.Remove(buffId, out BuffDataBase buff))
+            // 判断是否需要加入Update轮询列表
+            if (buffNode.HasType(BuffType.Duration) || buffNode.Duration >= 0)
             {
-                return;
+                self.UpdateBuffs.Add(buffNode.Id);
+            }
+            
+
+            // 注册事件监听
+            if (buffNode.ListenEvents != null)
+            {
+                foreach (BuffEventType triggerEvent in buffNode.ListenEvents)
+                {
+                    if (!self.EventBuffs.ContainsKey(triggerEvent))
+                    {
+                        self.EventBuffs[triggerEvent] = new List<long>();
+                    }
+                    self.EventBuffs[triggerEvent].Add(buffNode.Id);
+                }
             }
 
-            BuffFactory.Instance.GetRunner(buff.GetType()).ExpiredBuff(self, buff).Coroutine();
-
-            EventSystem.Instance.PublishAsync(self.Scene(), new OnBuffExpiredEvent() { Unit = self.GetParent<Unit>(), Buff = buff }).Coroutine();
+            self.ApplyBuff(buffNode);
+            
+            return buffNode;
         }
 
         /// <summary>
-        ///     删除指定类型的所有buff
+        /// 应用buff效果
         /// </summary>
         /// <param name="self"></param>
-        /// <param name="buffType"></param>
-        public static void RemoveBuffs(this BuffComponent self, BuffType buffType)
+        /// <param name="buffNode"></param>
+        public static void ApplyBuff(this BuffComponent self, BuffNode buffNode)
         {
-            var expiredKeys = new List<int>();
-            foreach (BuffDataBase buff in self.Buffs.Values)
+            // 如果是属性修改型Buff，添加时立即重算属性
+            //if (buffNode.HasType(BuffType.AttributeModifer)  || buffNode.NumericModifiers != null)
+            if (buffNode.NumericModifiers != null)
             {
-                if (buff.Type == buffType)
+                self.ApplyNumericModifiers(buffNode);
+            }
+            
+            // 触发OnAdd事件 - Buff添加时的立即效果
+            self.OnBuffAdded(buffNode);
+            
+            Log.Info($"[BuffSystem] 添加Buff: {buffNode.BuffName}, 来源: {buffNode.SourceId}, 目标: {buffNode.TargetId}");
+        }
+        
+        /// <summary>
+        /// 移除Buff
+        /// </summary>
+        public static void RemoveBuff(this BuffComponent self, long buffInstanceId)
+        {
+            BuffNode buffNode = self.GetChild<BuffNode>(buffInstanceId);
+            if (buffNode == null)
+            {
+                return;
+            }
+
+            // 触发OnRemove回调
+            self.OnBuffRemoved(buffNode);
+
+            // 如果是属性修改型，移除时回滚属性并重算
+            if (buffNode.NumericModifiers != null)
+            {
+                self.RemoveNumericModifiers(buffNode);
+            }
+
+            // 从各索引中移除
+            if (self.BuffsByConfigId.TryGetValue(buffNode.ConfigId, out List<long> configList))
+            {
+                configList.Remove(buffInstanceId);
+                if (configList.Count == 0)
                 {
-                    expiredKeys.Add(buff.BuffId);
+                    self.BuffsByConfigId.Remove(buffNode.ConfigId);
                 }
             }
 
-            foreach (int key in expiredKeys)
+            if (buffNode.Tags != null)
             {
-                self.RemoveBuff(key);
+                foreach (string tag in buffNode.Tags)
+                {
+                    if (!self.BuffsByTag.TryGetValue(tag, out List<long> tagList))
+                    {
+                        continue;
+                    }
+
+                    tagList.Remove(buffInstanceId);
+                    if (tagList.Count == 0)
+                    {
+                        self.BuffsByTag.Remove(tag);
+                    }
+                }
+            }
+
+            self.UpdateBuffs.Remove(buffInstanceId);
+
+            if (buffNode.ListenEvents != null)
+            {
+                foreach (BuffEventType triggerEvent in buffNode.ListenEvents)
+                {
+                    if (!self.EventBuffs.TryGetValue(triggerEvent, out List<long> eventList))
+                    {
+                        continue;
+                    }
+
+                    eventList.Remove(buffInstanceId);
+                    if (eventList.Count == 0)
+                    {
+                        self.EventBuffs.Remove(triggerEvent);
+                    }
+                }
+            }
+
+            // 从主字典移除并销毁
+            //self.Buffs.Remove(buffInstanceId);
+            self.RemoveChild(buffInstanceId);
+            //buffNode.Dispose();
+
+            Log.Info($"[BuffSystem] 移除Buff, BuffId: {buffInstanceId}");
+        }
+
+        /// <summary>
+        /// 移除指定ConfigId的所有Buff
+        /// </summary>
+        public static void RemoveBuffByConfigId(this BuffComponent self, int configId)
+        {
+            if (!self.BuffsByConfigId.TryGetValue(configId, out List<long> buffIds))
+            {
+                return;
+            }
+
+            // 复制一份列表，因为RemoveBuff会修改原列表
+            List<long> toRemove = new List<long>(buffIds);
+            foreach (long buffId in toRemove)
+            {
+                self.RemoveBuff(buffId);
             }
         }
+
+        /// <summary>
+        /// 驱散指定标签的Buff
+        /// </summary>
+        public static int DispelByTag(this BuffComponent self, string tag, int count = -1)
+        {
+            if (!self.BuffsByTag.TryGetValue(tag, out List<long> buffIds))
+            {
+                return 0;
+            }
+
+            List<long> toRemove = new List<long>(buffIds);
+            int removed = 0;
+            foreach (long buffId in toRemove)
+            {
+                if (count >= 0 && removed >= count)
+                {
+                    break;
+                }
+                
+                BuffNode buff = self.GetChild<BuffNode>(buffId);
+
+                if (buff != null && buff.IsDispellable)
+                {
+                    self.RemoveBuff(buffId);
+                    removed++;
+                }
+            }
+
+            return removed;
+        }
+
+        public static bool HasTag(this BuffComponent self, string tag)
+        {
+            if (!self.BuffsByTag.TryGetValue(tag, out List<long> buffIds))
+            {
+                return false;
+            }
+            
+            return buffIds.Count > 0;
+        }
+        
+        public static bool HasAny(this BuffComponent self, IEnumerable<string> tags)
+        {
+            foreach (var tag in tags)
+            {
+                if (self.HasTag(tag))
+                {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        public static bool HasAll(this BuffComponent self, IEnumerable<string> tags)
+        {
+            foreach (var tag in tags)
+            {
+                if (!self.HasTag(tag))
+                {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+
+        /// <summary>
+        /// 发布战斗事件 - 事件驱动入口
+        /// 当战斗事件发生时调用此方法，立即触发所有监听该事件的Buff
+        /// </summary>
+        public static void PublishEvent<T>(this BuffComponent self, T eventData) where T : IBuffEvent
+        {
+            if (!self.EventBuffs.TryGetValue(eventData.EventType, out List<long> buffIds))
+            {
+                return;
+            }
+
+            // 遍历监听该事件的Buff，执行触发逻辑
+            // 注意：这里遍历副本，防止触发过程中Buff列表变化
+            List<long> buffList = new List<long>(buffIds);
+            foreach (long buffId in buffList)
+            {
+                //if (!self.Buffs.TryGetValue(buffId, out BuffNode buffNode))
+                BuffNode buffNode = self.GetChild<BuffNode>(buffId);
+                if (buffNode != null)
+                {
+                    continue;
+                }
+
+                if (!buffNode.IsActive)
+                {
+                    continue;
+                }
+
+                // 检查冷却
+                if (buffNode.CooldownRemaining > 0)
+                {
+                    continue;
+                }
+
+                buffNode.CooldownRemaining = buffNode.Cooldown;
+                
+                self.OnBuffEventTriggered(buffNode, eventData);
+
+            }
+        }
+
+        /// <summary>
+        /// 叠加Buff层数
+        /// </summary>
+        public static int AddStack(this BuffComponent self, long buffInstanceId, int addStack = 1)
+        {
+            //if (!self.Buffs.TryGetValue(buffInstanceId, out BuffNode buffNode))
+            BuffNode buffNode = self.GetChild<BuffNode>(buffInstanceId);
+            if (buffNode == null)
+            {
+                return 0;
+            }
+
+            int oldStack = buffNode.CurrentStack;
+            int newStack = Math.Min(buffNode.MaxStack, buffNode.CurrentStack + addStack);
+
+            if (buffNode.CurrentStack != newStack)
+            {
+                // 层数变化，重算属性
+                if (buffNode.NumericModifiers != null)
+                {
+                    self.RemoveNumericModifiers(buffNode);
+                    buffNode.CurrentStack = newStack;
+                    self.ApplyNumericModifiers(buffNode);
+                }
+                
+                buffNode.CurrentStack = newStack;
+                
+                // 刷新持续时间（王者荣耀大部分Buff叠层会刷新时间）
+                buffNode.ElapsedTime = 0;
+                
+                Log.Info($"[BuffSystem] Buff层数变化: {buffNode.BuffName}, {oldStack} -> {buffNode.CurrentStack}");
+            }
+
+            return buffNode.CurrentStack;
+        }
+
+        /// <summary>
+        /// 应用属性修改器到数值组件
+        /// </summary>
+        private static void ApplyNumericModifiers(this BuffComponent self, BuffNode buffNode)
+        {
+            Unit owner = self.GetParent<Unit>();
+            NumericComponent numeric = owner.GetComponent<NumericComponent>();
+            if (numeric == null || buffNode.NumericModifiers == null)
+            {
+                return;
+            }
+
+            int stack = buffNode.CurrentStack;
+            foreach (var kv in buffNode.NumericModifiers)
+            {
+                long value = kv.Value * stack;
+                numeric[kv.Key] += value;
+            }
+        }
+
+        /// <summary>
+        /// 移除属性修改器
+        /// </summary>
+        private static void RemoveNumericModifiers(this BuffComponent self, BuffNode buffNode)
+        {
+            Unit owner = self.GetParent<Unit>();
+            NumericComponent numeric = owner.GetComponent<NumericComponent>();
+            if (numeric == null || buffNode.NumericModifiers == null)
+            {
+                return;
+            }
+
+            int stack = buffNode.CurrentStack;
+            foreach (var kv in buffNode.NumericModifiers)
+            {
+                long value = kv.Value * stack;
+                numeric[kv.Key] -= value;
+            }
+        }
+        
+
+        /// <summary>
+        /// Buff添加时回调 - 具体Buff逻辑可以override或者通过事件系统分发
+        /// </summary>
+        private static void OnBuffAdded(this BuffComponent self, BuffNode buffNode)
+        {
+            // 具体英雄/装备Buff逻辑通过单独的Handler处理
+            BuffHandlerDispatcher.Instance.DispatchOnAdd(self, buffNode).Coroutine();
+        }
+
+        /// <summary>
+        /// Buff移除时回调
+        /// </summary>
+        private static void OnBuffRemoved(this BuffComponent self, BuffNode buffNode)
+        {
+            BuffHandlerDispatcher.Instance.DispatchOnRemove(self, buffNode).Coroutine();
+        }
+
+        /// <summary>
+        /// 间隔Tick回调
+        /// </summary>
+        private static void OnIntervalTick(this BuffComponent self, BuffNode buffNode)
+        {
+            BuffHandlerDispatcher.Instance.DispatchOnIntervalTick(self, buffNode).Coroutine();
+        }
+
+        /// <summary>
+        /// Buff事件触发回调
+        /// </summary>
+        private static void OnBuffEventTriggered<T>(this BuffComponent self, BuffNode buffNode, T eventData) where T : IBuffEvent
+        {
+            BuffHandlerDispatcher.Instance.DispatchOnEvent(self, buffNode, eventData).Coroutine();
+        }
+        
     }
 }

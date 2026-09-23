@@ -7,6 +7,7 @@ namespace ET
 {
     [EntitySystemOf(typeof(ElementalComponent))]
     [FriendOf(typeof(ElementalComponent))]
+    [FriendOf(typeof(BuffNode))]
     public static partial class ElementalComponentSystem
     {
         [EntitySystem]
@@ -211,7 +212,7 @@ namespace ET
                 BuffComponent buffComponent = self.GetParent<Unit>().GetComponent<BuffComponent>();
                 foreach (int buffId in config.BuffIds)
                 {
-                    BuffDataBase buffAdded = buffComponent.AddBuff(attacker.Id, buffId);
+                    BuffNode buffAdded = buffComponent.AddBuff(attacker.Id, buffId);
                     if (buffAdded != null && buffAdded.Duration > buffDuration)
                     {
                         buffDuration = buffAdded.Duration;

@@ -28,8 +28,8 @@ namespace ET
             }
 
             // 2. 检查Buff限制 (例如: 沉默状态下不可施法)
-            BuffComponent buffComp = self.GetParent<Unit>().GetComponent<BuffComponent>();
-            if (buffComp != null && buffComp.HasBuff(9999)) // 假设9999是沉默Buff
+            StateComponent stateComponent = self.GetParent<Unit>().GetComponent<StateComponent>();
+            if (stateComponent != null && stateComponent.CanCast()) // 假设9999是沉默Buff
             {
                 return false;
             }

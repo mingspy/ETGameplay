@@ -23,6 +23,8 @@ public static class TimeHelper
         return TimeInfo.Instance.ServerNow();
     }
 
+    public static long DeltaTime => TimeInfo.Instance.DeltaTime;
+
     /// <summary>
     ///     配置文件时间转换器，用于Buff/Skill/Elemental等时间的转换<br />
     ///     【规定】：配置文件中时间如果是int,long类型，单位本身就是毫秒，如果是float或者double表示秒数<br />
