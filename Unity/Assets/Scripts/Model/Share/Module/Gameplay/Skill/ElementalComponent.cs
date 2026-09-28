@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using MemoryPack;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace ET
 {
@@ -36,13 +34,12 @@ namespace ET
         /// <summary>
         ///     基础材质（物体固有材质）
         /// </summary>
-        public Elemental BaseMaterial = new Elemental{ElementalType = ElementalType.Material, ElementalPosition= ElementalPosition.Base};
+        public Elemental BaseMaterial = new() { ElementalType = ElementalType.Material, ElementalPosition = ElementalPosition.Base };
 
         /// <summary>
         ///     表面材质覆盖（临时状态，如淋湿、结冰）
         /// </summary>
-        public Elemental SurfaceMaterial =  new Elemental{ElementalType = ElementalType.Material, ElementalPosition= ElementalPosition.Surface};
-        
+        public Elemental SurfaceMaterial = new() { ElementalType = ElementalType.Material, ElementalPosition = ElementalPosition.Surface };
 
         /// <summary>
         ///     元素连锁反应最大深度（防止团战无限连锁导致性能问题/数值溢出）
@@ -59,5 +56,4 @@ namespace ET
         /// </summary>
         public float DefaultSpreadRadius { get; set; } = 3.5f;
     }
-
 }

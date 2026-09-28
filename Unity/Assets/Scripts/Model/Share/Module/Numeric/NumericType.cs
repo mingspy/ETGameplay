@@ -12,11 +12,7 @@
         private const int _Pct = 3;
         private const int _FinalAdd = 4;
         private const int _FinalPct = 5;
-
-        /// <summary>
-        ///     int 转float的乘数
-        /// </summary>
-        public const int FLOAT_INT_MULTIPLY = 10000;
+        
 
         /// <summary>
         ///     numeric 的基数索引，比如Hp的基数 = Hp * 10 + 1
@@ -52,15 +48,7 @@
             return numeric * 10 + _FinalPct;
         }
 
-        public static int AsInt(float value)
-        {
-            return (int)(value * FLOAT_INT_MULTIPLY);
-        }
 
-        public static float AsFloat(int value)
-        {
-            return (float)value / FLOAT_INT_MULTIPLY;
-        }
 
         //小于此值的都被认为是原始属性
         public const int Max = 10000;
@@ -240,7 +228,24 @@
         ///     反伤(float)
         /// </summary>
         public const int ThornMailRate = 1505;
+        
+        /// <summary>
+        /// 伤害减免：受到伤害时
+        /// </summary>
+        public const int DamageReduction = 1506;
+        
+        /// <summary>
+        /// 全局增伤
+        /// </summary>
+        public const int BonusDamagePercent = 1507;
+        
+        /// <summary>
+        /// 全局治疗减益, 如制裁
+        /// </summary>
+        public const int HealReduction = 1508;
 
+        // Experience Points
+        public const int EXP = 1998;
         //等级
         public const int Level = 1999;
 

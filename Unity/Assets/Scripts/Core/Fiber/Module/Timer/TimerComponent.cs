@@ -252,7 +252,6 @@ namespace ET
             }
             long timerId = self.GetId();
             TimerAction timer = new (TimerClass.OnceTimer, timeNow, tillTime - timeNow, type, args);
-            self.AddTimer(timerId, ref timer);
             return timerId;
         }
 

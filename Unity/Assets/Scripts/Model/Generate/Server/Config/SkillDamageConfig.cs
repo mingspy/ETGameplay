@@ -65,14 +65,24 @@ namespace ET
 		public string Description { get; set; }
 		/// <summary>伤害类型</summary>
 		public int DamageType { get; set; }
-		/// <summary>Numeric伤害加成比例</summary>
-		public double NumericRatio { get; set; }
-		/// <summary>基础伤害</summary>
-		public double FlatBaseValue { get; set; }
+		/// <summary>伤害系数。基础伤害  = 攻击力 * 伤害系数 + 固定伤害值 = 攻击力 * Coefficient + BaseValue</summary>
+		public double Coefficient { get; set; }
+		/// <summary>技能固定伤害值</summary>
+		public int BaseDamage { get; set; }
 		/// <summary>是否可暴击,1可以</summary>
 		public int CanCrit { get; set; }
 		/// <summary>吸血比例</summary>
-		public double LifestealRate { get; set; }
+		public double LifeStealRate { get; set; }
+		/// <summary>0:立即触发，1：延迟，2：持续伤害</summary>
+		public int DamageTriggerType { get; set; }
+		/// <summary>延迟伤害执行时间，单位毫秒</summary>
+		public int DelayTime { get; set; }
+		/// <summary>命中时自身添加的BuffID</summary>
+		public int[] HitBuffIdsForSelf { get; set; }
+		/// <summary>命中时队友添加的BuffID</summary>
+		public int[] HitBuffIdsForTeam { get; set; }
+		/// <summary>命中时目标添加的BuffID</summary>
+		public int[] HitBuffIdsForTarget { get; set; }
 
 	}
 }

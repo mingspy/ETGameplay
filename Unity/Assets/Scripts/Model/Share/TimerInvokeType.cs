@@ -15,5 +15,7 @@
         public const int SessionAcceptTimeout = 203;
         
         public const int RoomUpdate = 301;
+
+        public const int DelayTakeDamage = 401;
     }
 }

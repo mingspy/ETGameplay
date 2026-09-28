@@ -7,107 +7,104 @@ namespace ET
     [FriendOf(typeof(BuffNode))]
     public class BuffHandlerDispatcher : Singleton<BuffHandlerDispatcher>, ISingletonAwake
     {
-        /// <summary>
-        /// 按ConfigId索引的BuffHandler
-        /// </summary>
-        private readonly Dictionary<int, List<IBuffHandler>> handlers = new();
-        
-        /// <summary>
-        /// 按类型索引的BuffHandler
-        /// </summary>
-        private readonly Dictionary<Type, List<IBuffHandler>> typeHandlers = new();
-        
         public void Awake()
         {
-            HashSet<Type> types = CodeTypes.Instance.GetTypes(typeof(BuffHandlerAttribute));
+            var types = CodeTypes.Instance.GetTypes(typeof(BuffHandlerAttribute));
             foreach (Type type in types)
             {
                 object[] attrs = type.GetCustomAttributes(typeof(BuffHandlerAttribute), false);
                 foreach (object attr in attrs)
                 {
-                    IBuffHandler obj = (IBuffHandler)Activator.CreateInstance(type);
-                    if (obj.ConfigId > 0)
+                    BuffHandlerAttribute numericWatcherAttribute = (BuffHandlerAttribute)attr;
+                    IBuffHandler handler = (IBuffHandler)Activator.CreateInstance(type);
+                    this.BuffHandlersById.TryAdd(handler.HandlerId, handler);
+                    if (!this.BuffHandlersByType.TryGetValue(handler.BuffType, out var handlers))
                     {
-                        if (!this.handlers.ContainsKey(obj.ConfigId))
-                        {
-                            this.handlers.Add(obj.ConfigId, new List<IBuffHandler>());
-                        }
-                        this.handlers[obj.ConfigId].Add(obj);
-                        this.handlers[obj.ConfigId].Sort((a,b) => b.Priority.CompareTo(a.Priority));
+                        handlers = ObjectPool.Instance.Fetch<List<IBuffHandler>>();
+                        this.BuffHandlersByType[handler.BuffType] = handlers;
                     }
-                    
-                    if (!this.typeHandlers.ContainsKey(obj.BuffType))
+
+                    if (!handlers.Exists(a => a.HandlerId == handler.HandlerId))
                     {
-                        this.typeHandlers.Add(obj.BuffType, new List<IBuffHandler>());
+                        handlers.Add(handler);
+                        handlers.Sort((a, b) => b.Priority.CompareTo(a.Priority));
                     }
-                    
-                    this.typeHandlers[obj.BuffType].Add(obj);
-                    this.typeHandlers[obj.BuffType].Sort((a,b) => b.Priority.CompareTo(a.Priority));
-                }
-            }
-        }
-        
-        public List<IBuffHandler> GetHandlers(BuffNode buffNode)
-        {
-            
-            if (this.handlers.TryGetValue(buffNode.ConfigId, out var idHandlers))
-            {
-                return idHandlers ;
-            }
-            
-            if (this.typeHandlers.TryGetValue(buffNode.GetType(), out var typesHandlers))
-            {
-                return typesHandlers ;
-            }
-            
-            return null;
-        }
-        
-        public async ETTask DispatchOnAdd(BuffComponent self, BuffNode buffNode)
-        {
-            var listHandlers = this.GetHandlers(buffNode);
-            if (listHandlers == null) return;
-            foreach (IBuffHandler handler in listHandlers)
-            {
-                try
-                {
-                    await handler.OnAdd(self, buffNode);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e);
-                }
-            }
-            
-        }
-
-        public async ETTask DispatchOnRemove(BuffComponent self, BuffNode buffNode)
-        {
-            var listHandlers = this.GetHandlers(buffNode);
-            if (listHandlers == null) return;
-            foreach (IBuffHandler handler in listHandlers)
-            {
-                try
-                {
-                    await handler.OnRemove(self, buffNode);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e);
                 }
             }
         }
 
-        public async ETTask DispatchOnIntervalTick(BuffComponent self, BuffNode buffNode)
+        protected override void Destroy()
         {
-            
-            var listHandlers = this.GetHandlers(buffNode);
-            if (listHandlers == null) return;
-            foreach (IBuffHandler handler in listHandlers)
+            if (this.buffHandlersById != null)
+            {
+                this.buffHandlersById.Clear();
+                ObjectPool.Instance.Recycle(this.buffHandlersById);
+                this.buffHandlersById = null;
+            }
+
+            if (this.buffHandlersByType != null)
+            {
+                foreach (var kvp in this.buffHandlersByType)
+                {
+                    ObjectPool.Instance.Recycle(kvp.Value);
+                }
+
+                this.buffHandlersByType.Clear();
+                ObjectPool.Instance.Recycle(this.buffHandlersByType);
+                this.buffHandlersByType = null;
+            }
+        }
+
+        #region BuffHandler 管理
+
+        /// <summary>
+        ///     按handlerId索引的BuffHandler，唯一索引，优先获得执行机会。
+        /// </summary>
+        private SortedDictionary<int, IBuffHandler> buffHandlersById;
+
+        public SortedDictionary<int, IBuffHandler> BuffHandlersById
+        {
+            get
+            {
+                return this.buffHandlersById ??= ObjectPool.Instance.Fetch<SortedDictionary<int, IBuffHandler>>();
+            }
+        }
+
+        /// <summary>
+        ///     按类型索引的BuffHandler，按照Priority顺序执行。
+        /// </summary>
+        private SortedDictionary<Type, List<IBuffHandler>> buffHandlersByType;
+
+        public SortedDictionary<Type, List<IBuffHandler>> BuffHandlersByType
+        {
+            get
+            {
+                return this.buffHandlersByType ??= ObjectPool.Instance.Fetch<SortedDictionary<Type, List<IBuffHandler>>>();
+            }
+        }
+
+        #endregion
+
+        #region BuffHandler Methods
+
+        public async ETTask DispatchBuffAdd(BuffComponent buffComponent, BuffNode buffNode)
+        {
+            if (this.BuffHandlersById.TryGetValue(buffNode.HandlerId, out IBuffHandler aHandler))
+            {
+                await aHandler.OnAdd(buffComponent, buffNode);
+                return;
+            }
+
+            if (!this.BuffHandlersByType.TryGetValue(buffNode.GetType(), out var handlers))
+            {
+                return;
+            }
+
+            foreach (IBuffHandler handler in handlers)
             {
                 try
                 {
-                    await handler.OnIntervalTick(self, buffNode);
+                    await handler.OnAdd(buffComponent, buffNode);
                 }
                 catch (Exception e)
                 {
@@ -116,15 +113,24 @@ namespace ET
             }
         }
 
-        public  async ETTask DispatchOnEvent<T>(BuffComponent self, BuffNode buffNode,  T eventData) where T : IBuffEvent
+        public async ETTask DispatchBuffRemove(BuffComponent buffComponent, BuffNode buffNode)
         {
-            var listHandlers = this.GetHandlers(buffNode);
-            if (listHandlers == null) return;
-            foreach (IBuffHandler handler in listHandlers)
+            if (this.BuffHandlersById.TryGetValue(buffNode.HandlerId, out IBuffHandler aHandler))
+            {
+                await aHandler.OnRemove(buffComponent, buffNode);
+                return;
+            }
+
+            if (!this.BuffHandlersByType.TryGetValue(buffNode.GetType(), out var handlers))
+            {
+                return;
+            }
+
+            foreach (IBuffHandler handler in handlers)
             {
                 try
                 {
-                    await handler.OnEvent(self, buffNode, eventData);
+                    await handler.OnRemove(buffComponent, buffNode);
                 }
                 catch (Exception e)
                 {
@@ -132,5 +138,59 @@ namespace ET
                 }
             }
         }
+
+        public async ETTask DispatchBuffIntervalTick(BuffComponent buffComponent, BuffNode buffNode)
+        {
+            if (this.BuffHandlersById.TryGetValue(buffNode.HandlerId, out IBuffHandler aHandler))
+            {
+                await aHandler.OnIntervalTick(buffComponent, buffNode);
+                return;
+            }
+
+            if (!this.BuffHandlersByType.TryGetValue(buffNode.GetType(), out var handlers))
+            {
+                return;
+            }
+
+            foreach (IBuffHandler handler in handlers)
+            {
+                try
+                {
+                    await handler.OnIntervalTick(buffComponent, buffNode);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e);
+                }
+            }
+        }
+
+        public async ETTask DispatchBuffEvent<T>(BuffComponent buffComponent, BuffNode buffNode, T eventData) where T : IDamagePipelineEvent
+        {
+            if (this.BuffHandlersById.TryGetValue(buffNode.HandlerId, out IBuffHandler aHandler))
+            {
+                await aHandler.OnEvent(buffComponent, buffNode, eventData);
+                return;
+            }
+
+            if (!this.BuffHandlersByType.TryGetValue(buffNode.GetType(), out var handlers))
+            {
+                return;
+            }
+
+            foreach (IBuffHandler handler in handlers)
+            {
+                try
+                {
+                    await handler.OnEvent(buffComponent, buffNode, eventData);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e);
+                }
+            }
+        }
+
+        #endregion
     }
 }

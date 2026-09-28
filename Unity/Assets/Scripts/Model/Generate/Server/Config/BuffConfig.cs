@@ -67,6 +67,10 @@ namespace ET
 		public string Description { get; set; }
 		/// <summary>BuffType</summary>
 		public int BuffType { get; set; }
+		/// <summary>BuffHandler处理器ID</summary>
+		public int HandlerId { get; set; }
+		/// <summary>BuffNode子类类型名称，默认BuffNode。子类可以存储自定义数据，方便处理器工作。</summary>
+		public string ClassName { get; set; }
 		/// <summary>Tags</summary>
 		public string[] Tags { get; set; }
 		/// <summary>最多叠加层数</summary>
@@ -76,11 +80,13 @@ namespace ET
 		/// <summary>周期性, 0为没有，单位毫秒</summary>
 		public int Interval { get; set; }
 		/// <summary>修改的属性</summary>
-		public int[] Numerics { get; set; }
+		public int[] Attributes { get; set; }
 		/// <summary>修改的值, int 属性设置成原来值；float 值需要 * 10000，比如0.5，这里设置成5000</summary>
-		public int[] NumericValues { get; set; }
+		public int[] AttributeValues { get; set; }
 		/// <summary>监听的事件id</summary>
 		public int[] ListenEvents { get; set; }
+		/// <summary>附加数据</summary>
+		public string CustomData { get; set; }
 
 	}
 }

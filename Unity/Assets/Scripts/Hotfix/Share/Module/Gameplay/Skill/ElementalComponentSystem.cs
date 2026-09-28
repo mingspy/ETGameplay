@@ -68,7 +68,7 @@ namespace ET
         /// <summary>
         ///     判定并触发元素反应（重载：支持反应深度参数）
         /// </summary>
-        public static ReactionInfo TryReactOrAppendElement(this ElementalComponent self, Unit attacker, ElementType attackElement, int attackElementAmount, int currentDepth = 0)
+        public static ReactionInfo TryReactOrAppendElement(this ElementalComponent self, Unit attacker, ElementType attackElement, float attackElementAmount, int currentDepth = 0)
         {
             if (attackElement == ElementType.None || currentDepth > self.MaxReactionDepth || attackElementAmount < 1)
             {
@@ -116,7 +116,7 @@ namespace ET
             return null;
         }
 
-        private static void AttachElement(this ElementalComponent self, ElementType attackElement, int amount, long duration, int decay, long sourceId)
+        private static void AttachElement(this ElementalComponent self, ElementType attackElement, float amount, long duration, int decay, long sourceId)
         {
             if (amount < 1)
             {
@@ -130,7 +130,7 @@ namespace ET
                 elem = new Elemental
                 {
                     Type = eType,
-                    Gauge = amount,
+                    Gauge = (int)amount,
                     EndTime = duration + TimeHelper.Now(),
                     DecayPerSecond = decay,
                     SourceId = sourceId
@@ -139,7 +139,7 @@ namespace ET
             }
             else
             {
-                elem.Gauge += amount;
+                elem.Gauge += (int)amount;
                 elem.EndTime = Math.Max(duration + TimeHelper.Now(), elem.EndTime);
                 elem.DecayPerSecond = Math.Max(decay, elem.DecayPerSecond);
                 elem.SourceId = sourceId;
@@ -153,7 +153,7 @@ namespace ET
         /// <param name="sourceElement"></param>
         /// <param name="sourceAmount"></param>
         /// <returns></returns>
-        private static ReactionInfo TryElementalReaction(Elemental elem, ElementType sourceElement, int sourceAmount)
+        private static ReactionInfo TryElementalReaction(Elemental elem, ElementType sourceElement, float sourceAmount)
         {
             if (elem.Gauge < 1 || elem.Type == 0)
             {

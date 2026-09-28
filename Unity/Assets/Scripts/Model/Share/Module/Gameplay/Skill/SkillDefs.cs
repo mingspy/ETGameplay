@@ -6,88 +6,41 @@ namespace ET
     {
     }
 
-    /// <summary>
-    ///     战斗事件类型
-    /// </summary>
-    public enum BattleEventType
-    {
-        OnTakeDamage = 1, // 受到伤害
-        OnDealDamage = 2, // 造成伤害
-        OnKill = 3, // 击杀
-        OnDeath = 4 // 死亡
-    }
-
-    /// <summary>
-    ///     战斗事件数据
-    /// </summary>
-    public struct BattleEventData
-    {
-        public Unit Attacker { get; set; } // 攻击者
-        public Unit Target{ get; set; } // 受击者
-        public string Note{ get; set; }// 伤害来源
-        public float TotalDamage{ get; set; }
-        public List<DamageInfo> DamageDetail{ get; set; }
-        public object Arg{ get; set; }// 其他参数
-    }
-
-    /// <summary>
-    ///     伤害类型
-    /// </summary>
-    public static class DamageType
-    {
-        public const int True = 0, // 真伤
-                Physical = 1, // 物理伤害
-                Magical = 2, // 法术伤害
-                Metal = 3, // 金 
-                Wood = 4, // 木 
-                Water = 5, // 水
-                Fire = 6, // 火
-                Earth = 7, // 土/地
-                Wind = 8, // 风
-                Lightning = 9, // 雷 / 电 
-                Light = 10, // 光 / 圣
-                Dark = 11, // 暗 / 邪
-                Poison = 12, // 毒 (或 Toxin)
-                Oil = 13, //  油，易燃，易爆 
-                Ice = 14; // 冰
-
-        public static bool IsElemental(int damageType)
-        {
-            return damageType is >= Metal and <= Ice;
-        }
-
-        public static ElementType ToElement(int damageType)
-        {
-            return (ElementType)damageType;
-        }
-    }
-
     [EnableClass]
-    public class DamageInfo
+    public class DamageReq
     {
         /// <summary>伤害类型</summary>
-        public int DamageType { get; set; }
-        /// <summary>Numeric伤害加成比例</summary>
-        public double NumericRatio { get; set; }
+        public DamageType DamageType { get; set; }
+
+        /// <summary>
+        ///     伤害加成比例。计算基础伤害 (Base Damage) = 攻击力 * 伤害系数 + 固定伤害值 = 攻击力 * Coefficient + RawDamage
+        /// </summary>
+        public double Coefficient { get; set; }
+
         /// <summary>基础伤害</summary>
-        public double FlatBaseValue { get; set; }
+        public double BaseDamage { get; set; }
+
         /// <summary>是否可暴击,1可以</summary>
         public bool CanCrit { get; set; }
+
         /// <summary>吸血比例</summary>
         public double LifeStealRate { get; set; }
-        
-         // Result
-         public float BaseDamage { get; set; }
-         public bool IsCritical { get; set; } //// 是否暴击
-         public float FinalDamage { get; set; } // 伤害数值
-         public ReactionInfo ReactionResult { get; set; } // 元素伤害
+
+        #region 待配置文件支持
+
+        public DamageTriggerType TriggerType; // 瞬时/延迟/持续每帧
+        public long DelayTime; // 延迟触发时间
+        public long Duration; // 持续伤害总时长
+        public long TickInterval; // 持续伤害间隔
+
+        #endregion
     }
-    
 
     // 运行时技能实例
     [EnableClass]
-    public class SkillInstance
+    public class SkillNode
     {
+        public SkillType SkillType { get; set; }
         public SkillConfig Config { get; set; }
         public int Level { get; private set; } // 当前等级
         public List<SkillDamageConfig> Damages { get; set; }

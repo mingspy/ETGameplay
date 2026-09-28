@@ -9,7 +9,7 @@ namespace ET
     {
         public static float GetAsFloat(this NumericComponent self, int numericType)
         {
-            return (float)self.GetByKey(numericType) / NumericType.FLOAT_INT_MULTIPLY;
+            return NumericComponent.ValueAsFloat(self.GetByKey(numericType));
         }
 
         public static int GetAsInt(this NumericComponent self, int numericType)
@@ -24,7 +24,7 @@ namespace ET
 
         public static void Set(this NumericComponent self, int nt, float value)
         {
-            self[nt] = (long)(value * NumericType.FLOAT_INT_MULTIPLY);
+            self[nt] = NumericComponent.ValueAsLong(value);
         }
 
         public static void Set(this NumericComponent self, int nt, int value)
@@ -98,8 +98,14 @@ namespace ET
     }
 
     [ComponentOf(typeof (Unit))]
+    [EnableMethod]
     public class NumericComponent: Entity, IAwake, ITransfer
     {
+        /// <summary>
+        ///     int 转float的乘数
+        /// </summary>
+        public const int FLOAT_INT_MULTIPLY = 10000;
+        
         /// <summary>
         /// 存放数值属性的所有计算结果值，由GAS更新。这里实现的NumericComponent 相当于GAS中的AttributeValue集合。
         /// Key: NumericType，规则
@@ -117,6 +123,16 @@ namespace ET
             {
                 this.Insert(numericType, value);
             }
+        }
+        
+        public static long ValueAsLong(float value)
+        {
+            return (long)(value * FLOAT_INT_MULTIPLY);
+        }
+
+        public static float ValueAsFloat(long value)
+        {
+            return (float)value / FLOAT_INT_MULTIPLY;
         }
     }
 }
