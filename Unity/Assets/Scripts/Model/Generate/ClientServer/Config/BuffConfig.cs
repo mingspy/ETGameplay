@@ -65,7 +65,7 @@ namespace ET
 		public string Name { get; set; }
 		/// <summary>描述</summary>
 		public string Description { get; set; }
-		/// <summary>BuffType</summary>
+		/// <summary>Type</summary>
 		public int BuffType { get; set; }
 		/// <summary>BuffHandler处理器ID</summary>
 		public int HandlerId { get; set; }

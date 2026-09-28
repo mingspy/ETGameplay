@@ -18,10 +18,10 @@ namespace ET
                     BuffHandlerAttribute numericWatcherAttribute = (BuffHandlerAttribute)attr;
                     IBuffHandler handler = (IBuffHandler)Activator.CreateInstance(type);
                     this.BuffHandlersById.TryAdd(handler.HandlerId, handler);
-                    if (!this.BuffHandlersByType.TryGetValue(handler.BuffType, out var handlers))
+                    if (!this.BuffHandlersByType.TryGetValue(handler.BuffClassType, out var handlers))
                     {
                         handlers = ObjectPool.Instance.Fetch<List<IBuffHandler>>();
-                        this.BuffHandlersByType[handler.BuffType] = handlers;
+                        this.BuffHandlersByType[handler.BuffClassType] = handlers;
                     }
 
                     if (!handlers.Exists(a => a.HandlerId == handler.HandlerId))
@@ -165,11 +165,12 @@ namespace ET
             }
         }
 
-        public async ETTask DispatchBuffEvent<T>(BuffComponent buffComponent, BuffNode buffNode, T eventData) where T : IDamagePipelineEvent
+        public async ETTask DispatchBuffEvent<T>(BuffComponent buffComponent, BuffNode buffNode, T eventData) where T : IDamageEvent
         {
             if (this.BuffHandlersById.TryGetValue(buffNode.HandlerId, out IBuffHandler aHandler))
             {
                 await aHandler.OnEvent(buffComponent, buffNode, eventData);
+                eventData.Context.IsHandled = eventData.IsHandled;
                 return;
             }
 
@@ -183,6 +184,11 @@ namespace ET
                 try
                 {
                     await handler.OnEvent(buffComponent, buffNode, eventData);
+                    if (eventData.IsHandled)
+                    {
+                        eventData.Context.IsHandled = true;
+                        return;
+                    }
                 }
                 catch (Exception e)
                 {

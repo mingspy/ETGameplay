@@ -8,7 +8,7 @@ namespace ET
     [FriendOf(typeof(BuffNode))]
     public static partial class BuffComponentSystem
     {
-        #region System
+        #region Buff EntitySystem
 
         [EntitySystem]
         private static void Awake(this BuffComponent self)
@@ -88,7 +88,7 @@ namespace ET
 
         #endregion
 
-        #region BuffNode Methods
+        #region BuffNode Manage 
 
         /// <summary>
         ///     添加Buff - 核心入口方法
@@ -135,7 +135,7 @@ namespace ET
         }
 
         /// <summary>
-        ///     临时测试用，后续改用前面几个方法。要求BuffType和ConfigId对应，并且在BuffConfig配置中存在。 如BuffId = BuffType.Stunned,Frozen,Invincible
+        ///     临时测试用，后续改用前面几个方法。要求BuffType和ConfigId对应，并且在BuffConfig配置中存在。 如BuffId = Type.Stunned,Frozen,Invincible
         /// </summary>
         /// <param name="self"></param>
         /// <param name="sourceId"></param>
@@ -149,7 +149,7 @@ namespace ET
             // 创建BuffNode实例
             BuffNode buffNode = self.AddChild<BuffNode>();
             buffNode.Init((int)buffType);
-            buffNode.BuffType = buffType;
+            buffNode.Type = buffType;
             buffNode.SourceId = sourceId;
             buffNode.TargetId = owner.Id;
             buffNode.Duration = duration;
@@ -231,7 +231,7 @@ namespace ET
             // 注册事件监听
             if (buffNode.ListenEvents != null)
             {
-                foreach (DamagePipelineEvent triggerEvent in buffNode.ListenEvents)
+                foreach (DamageStage triggerEvent in buffNode.ListenEvents)
                 {
                     if (!self.EventBuffs.ContainsKey(triggerEvent))
                     {
@@ -255,7 +255,7 @@ namespace ET
         public static void ApplyBuff(this BuffComponent self, BuffNode buffNode)
         {
             // 如果是属性修改型Buff，添加时立即重算属性
-            //if (buffNode.HasType(BuffType.AttributeModifer)  || buffNode.NumericModifiers != null)
+            //if (buffNode.HasType(Type.AttributeModifer)  || buffNode.NumericModifiers != null)
             if (buffNode.AttributeModifiers != null)
             {
                 self.ApplyNumericModifiers(buffNode);
@@ -264,7 +264,7 @@ namespace ET
             // 触发OnAdd事件 - Buff添加时的立即效果
             BuffHandlerDispatcher.Instance.DispatchBuffAdd(self, buffNode).Coroutine();
 
-            Log.Info($"[BuffSystem] 添加Buff: {buffNode.BuffName}, 来源: {buffNode.SourceId}, 目标: {buffNode.TargetId}");
+            Log.Info($"[BuffSystem] 添加Buff: {buffNode.Name}, 来源: {buffNode.SourceId}, 目标: {buffNode.TargetId}");
         }
 
         /// <summary>
@@ -318,7 +318,7 @@ namespace ET
 
             if (buffNode.ListenEvents != null)
             {
-                foreach (DamagePipelineEvent triggerEvent in buffNode.ListenEvents)
+                foreach (DamageStage triggerEvent in buffNode.ListenEvents)
                 {
                     if (!self.EventBuffs.TryGetValue(triggerEvent, out var eventList))
                     {
@@ -430,7 +430,7 @@ namespace ET
         ///     发布战斗事件 - 事件驱动入口
         ///     当战斗事件发生时调用此方法，立即触发所有监听该事件的Buff
         /// </summary>
-        public static void PublishEvent<T>(this BuffComponent self, T eventData) where T : IDamagePipelineEvent
+        public static void PublishEvent<T>(this BuffComponent self, T eventData) where T : IDamageEvent
         {
             if (!self.EventBuffs.TryGetValue(eventData.Stage, out var buffIds))
             {
@@ -496,7 +496,7 @@ namespace ET
                 // 刷新持续时间（王者荣耀大部分Buff叠层会刷新时间）
                 buffNode.ElapsedTime = 0;
 
-                Log.Info($"[BuffSystem] Buff层数变化: {buffNode.BuffName}, {oldStack} -> {buffNode.CurrentStack}");
+                Log.Info($"[BuffSystem] Buff层数变化: {buffNode.Name}, {oldStack} -> {buffNode.CurrentStack}");
             }
 
             return buffNode.CurrentStack;

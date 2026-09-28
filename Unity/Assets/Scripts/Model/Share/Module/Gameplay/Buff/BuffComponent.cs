@@ -61,18 +61,18 @@ namespace ET
             }
         }
 
-        private SortedDictionary<DamagePipelineEvent, List<long>> eventBuffs;
+        private SortedDictionary<DamageStage, List<long>> eventBuffs;
 
         /// <summary>
         ///     监听事件的Buff字典
         ///     Key: 事件类型, Value: 监听该事件的Buff列表
         ///     事件驱动时直接查找这个字典，不需要遍历所有Buff
         /// </summary>
-        public SortedDictionary<DamagePipelineEvent, List<long>> EventBuffs
+        public SortedDictionary<DamageStage, List<long>> EventBuffs
         {
             get
             {
-                return this.eventBuffs ??= ObjectPool.Instance.Fetch<SortedDictionary<DamagePipelineEvent, List<long>>>();
+                return this.eventBuffs ??= ObjectPool.Instance.Fetch<SortedDictionary<DamageStage, List<long>>>();
             }
         }
 

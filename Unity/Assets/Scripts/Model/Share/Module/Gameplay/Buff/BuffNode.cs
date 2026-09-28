@@ -13,12 +13,12 @@ namespace ET
         /// <summary>
         ///     Buff显示名称
         /// </summary>
-        public string BuffName;
+        public string Name;
 
         /// <summary>
         ///     Buff类型
         /// </summary>
-        public BuffType BuffType;
+        public BuffType Type;
 
         /// <summary>
         ///     Buff配置ID
@@ -53,8 +53,8 @@ namespace ET
 
         /// <summary>
         ///     持续时间（毫秒）<br />
-        ///     when BuffType == Duration, 0表示永久, <br />
-        ///     when BuffType == Instant,  &lt;=0 表示立即buff
+        ///     when Type == Duration, 0表示永久, <br />
+        ///     when Type == Instant,  &lt;=0 表示立即buff
         /// </summary>
         public long Duration = -1;
 
@@ -91,7 +91,7 @@ namespace ET
         /// <summary>
         ///     监听的事件类型列表 - EventTrigger类型使用
         /// </summary>
-        public List<DamagePipelineEvent> ListenEvents;
+        public List<DamageStage> ListenEvents;
 
         /// <summary>
         ///     最大层数
@@ -134,8 +134,8 @@ namespace ET
             base.Dispose();
 
             this.HandlerId = 0;
-            this.BuffName = null;
-            this.BuffType = 0;
+            this.Name = null;
+            this.Type = 0;
             this.SourceType = 0;
             this.SourceId = 0;
             this.TargetId = 0;
@@ -161,7 +161,7 @@ namespace ET
 
         public bool HasType(BuffType type)
         {
-            return (this.BuffType & type) == type;
+            return (this.Type & type) == type;
         }
 
         /// <summary>
@@ -188,8 +188,8 @@ namespace ET
             }
 
             BuffConfig config = BuffConfigCategory.Instance.Get(configId);
-            this.BuffName = config.Name;
-            this.BuffType = (BuffType)config.BuffType;
+            this.Name = config.Name;
+            this.Type = (BuffType)config.BuffType;
             this.Duration = TimeHelper.ToMS(config.Duration);
             this.Interval = config.Interval;
             this.MaxStack = config.MaxStack;
@@ -213,10 +213,10 @@ namespace ET
 
             if (config.ListenEvents.Length > 0)
             {
-                this.ListenEvents = new List<DamagePipelineEvent>();
+                this.ListenEvents = new List<DamageStage>();
                 foreach (int eventType in config.ListenEvents)
                 {
-                    this.ListenEvents.Add((DamagePipelineEvent)eventType);
+                    this.ListenEvents.Add((DamageStage)eventType);
                 }
             }
 

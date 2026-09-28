@@ -1,3 +1,5 @@
+using System;
+
 namespace ET
 {
     /// <summary>
@@ -77,24 +79,31 @@ namespace ET
     ///     命名规范：Modify*=可写管道钩子, On*/After*=只读通知
     ///     视角：Outgoing=攻击方, Incoming=受击方
     /// </summary>
-    public enum DamagePipelineEvent
+    [Flags]
+    public enum DamageStage
     {
         None = 0,
 
         // 以下的读写限制是指 DamageContext 属性
+        OnSkillCast = 1 << 0,
         // ===== 计算阶段（可写） =====
-        BeforeBaseDamageCalculate = 1, // Step1
-        ModifyCriticalRoll = 2, // Step2
-        ModifyBonusDamage = 3, // Step3  末世在此生成法球
-        ModifyDamageMitigation = 4, // Step4
-        ModifyOutgoingDamage = 5, // Step5  ★ 破军/暴烈之甲在此施加增伤
-        ModifyIncomingDamage = 6, // Step6
-        JudgeDamageNegation = 7, // Step7  名刀/纯净苍穹
-        JudgeExecute = 8, // Step8  斩杀判定
-        BeforeLifeSteal = 9, // 吸血装备
+        BeforeHit = 1 << 1, // 技能命中前，技能已经释放，如鲁班普攻前，判定是否强化普攻
+        BeforeCalcRawDamage = 1<< 2, // Step1
+        GatherCriticalRoll = 1<< 3, // Step2
+        CalcElement = 1<< 4, // Step3.0 计算元素伤害
+        GatherBonusDamage = 1<< 5, // Step3  末世在此生成法球
+        GatherDamageMitigation = 1<< 6, // Step4
+        GatherOutgoingDamage = 1<< 7, // Step5  ★ 破军/暴烈之甲在此施加增伤
+        GatherIncomingDamage = 1<< 8, // Step6
+        JudgeDamageNegation = 1<< 9, // Step7  名刀/纯净苍穹
+        JudgeExecute = 1<< 10, // Step8  斩杀判定
+        BeforeLifeSteal = 1<< 11, // 吸血装备
 
         // ===== 通知阶段（只读） =====
-        AfterBaseDamageCalculated = 11,
+        AfterHit= 1<< 12,  // 技能命中后事件，如鲁班普攻后，统计计数
+        AllCalcStages = 0x1FFF,
+        
+        AfterBaseDamageCalculated= 1<< 20,
         AfterCriticalResolved,
         AfterBonusDamageApplied,
         AfterDamageMitigated,
@@ -103,10 +112,13 @@ namespace ET
         AfterDamageNegated,
 
         // ===== 事后（只读） =====
-        OnLifeStealCalculated = 20,
+        OnLifeStealCalculated,
         OnDamageApplied, // 攻击方视角，触发被动效果
         OnDamageTaken // 受击方视角（反伤刺甲在此）
     }
+
+    
+
 
     /// <summary>
     ///     伤害结算累加器 —— 引用类型，各阶段共享同一实例
@@ -123,10 +135,18 @@ namespace ET
         public float TargetMaxHp { get; set; }
         public float Coefficient { get; set; }
         public float BaseDamage { get; set; }
-        public bool CanCrit { get; set; }
+
         public float LifeStealRate { get; set; }
+        
+        public SkillNode Skill { get; set; }
+        
+        public DamageTriggerType  DamageTriggerType { get; set; }
+        public long DamageDelayTime { get; set; }
+        //public SkillDamageConfig CurrentSkillDamageConfig { get; set; }
+        public DamageStage CalcStages { get; set; }
 
         // ===== 各阶段可写结果（默认值即"无修正"） =====
+        public bool IsHandled { get; set; } // 已经被处理，则拦截后续事件
         public float RawDamage { get; set; } // Step1
         public float CriticalMultiplier { get; set; } = 1f; // Step2
         public bool IsCritical { get; set; }
@@ -144,6 +164,24 @@ namespace ET
         // ===== 输出 =====
         public float FinalDamage { get; set; }
 
+        public bool HasStage(DamageStage stage)
+        {
+            return (this.CalcStages & stage) == stage;
+        }
+        
+        public void SetStage(DamageStage stage, bool flag)
+        {
+            if (flag)
+            {
+                this.CalcStages |= stage;
+            }
+            else
+            {
+                this.CalcStages &= ~stage;
+            }
+
+        }
+        
         public void Reset()
         {
             this.Source = this.Target = null;
@@ -153,28 +191,34 @@ namespace ET
             this.BaseDamage = this.FinalDamage = this.BonusDamage = this.NegationFactor = this.LifeStealRate = this.LifeStealAmount = 0f;
             this.CriticalMultiplier = this.MitigationMultiplier = this.AmplifyMultiplier = this.ReduceMultiplier = 1f;
             this.IsNegated = this.IsExecuted = false;
+            this.CalcStages = DamageStage.AllCalcStages;
         }
+        
     }
 
-    public interface IDamagePipelineEvent
+    public interface IDamageEvent
     {
-        public DamagePipelineEvent Stage { get; }
+        public DamageStage Stage { get; }
         public DamageContext Context { get; }
+        public bool IsHandled { get; set; }
     }
 
     /// <summary>
     ///     伤害管线阶段事件参数
     ///     注意：结构体本身会被拷贝，但 Context 是引用，修改对调用方可见
     /// </summary>
-    public struct DamagePipelineEventArg : IDamagePipelineEvent
+    public struct DamageEvent : IDamageEvent
     {
-        public DamagePipelineEvent Stage { get; }
+        public DamageStage Stage { get; }
         public DamageContext Context { get; }
-
-        public DamagePipelineEventArg(DamagePipelineEvent stage, DamageContext context)
+        
+        public bool IsHandled { get; set; }
+        public DamageEvent(DamageStage stage, DamageContext context)
         {
             this.Stage = stage;
             this.Context = context;
         }
     }
+    
+    
 }

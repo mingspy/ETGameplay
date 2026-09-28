@@ -15,7 +15,7 @@ namespace ET
         /// <summary>
         ///     处理的buff class 类型。TODO: 需要支持反射,从BuffConfig中反射出实际的buff类型，同时还要改BuffNode不能继承自Entity，才能绕过ET的限制。
         /// </summary>
-        public Type BuffType { get; }
+        public Type BuffClassType { get; }
 
         //public bool CanHandle(BuffNode buffNode);
         /// <summary>
@@ -26,7 +26,7 @@ namespace ET
         ETTask OnAdd(BuffComponent self, BuffNode buffNode);
         ETTask OnRemove(BuffComponent self, BuffNode buffNode);
         ETTask OnIntervalTick(BuffComponent self, BuffNode buffNode);
-        ETTask OnEvent<T>(BuffComponent self, BuffNode buffNode, T eventData) where T : IDamagePipelineEvent;
+        ETTask OnEvent<T>(BuffComponent self, BuffNode buffNode, T eventData) where T : IDamageEvent;
     }
 
     /// <summary>
@@ -42,16 +42,16 @@ namespace ET
         }
 
         public int HandlerId { get; }
-        public Type BuffType => typeof(A);
+        public Type BuffClassType => typeof(A);
 
         public int Priority { get; }
 
-        //public virtual bool CanHandle(BuffNode buffNode) => this.BuffType == buffNode.GetType();
+        //public virtual bool CanHandle(BuffNode buffNode) => this.Type == buffNode.GetType();
 
         public abstract ETTask OnAdd(BuffComponent self, BuffNode buffNode);
         public abstract ETTask OnRemove(BuffComponent self, BuffNode buffNode);
         public abstract ETTask OnIntervalTick(BuffComponent self, BuffNode buffNode);
-        public abstract ETTask OnEvent<T>(BuffComponent self, BuffNode buffNode, T eventData) where T : IDamagePipelineEvent;
+        public abstract ETTask OnEvent<T>(BuffComponent self, BuffNode buffNode, T eventData) where T : IDamageEvent;
     }
 
     /// <summary>
