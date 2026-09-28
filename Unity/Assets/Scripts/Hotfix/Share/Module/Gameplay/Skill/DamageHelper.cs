@@ -35,61 +35,70 @@ namespace ET
         public static void DealSkillDamage(this Unit attacker, Unit target, SkillNode skill)
         {
             BuffComponent buffComp = attacker.GetComponent<BuffComponent>();
-            
+            NumericComponent targetNumericComponent = target.GetComponent<NumericComponent>();
+
             DamageContext skillContext = ObjectPool.Instance.Fetch<DamageContext>();
-            skillContext.Skill = skill;
+            skillContext.Data.Skill = skill;
             buffComp.PublishEvent(new DamageEvent(DamageStage.BeforeHit, skillContext));
-            
+            if (skillContext.Data.IsHandled) // 比如鲁班的强化普攻，会拦截本次计算，改成三段普攻
+            {
+                ObjectPool.Instance.Recycle(skillContext);
+                return;
+            }
+
             foreach (SkillDamageConfig damageConfig in skill.Damages)
             {
                 DamageContext context = ObjectPool.Instance.Fetch<DamageContext>();
                 context.Reset();
                 context.Source = attacker;
                 context.Target = target;
-                context.DamageType = (DamageType)damageConfig.DamageType;
-                context.BaseDamage = damageConfig.BaseDamage;
-                context.Coefficient = (float)damageConfig.Coefficient;
-                context.SetStage(DamageStage.GatherCriticalRoll, damageConfig.CanCrit != 0); 
-                context.Skill = skill;
-                context.DamageTriggerType = (DamageTriggerType)damageConfig.DamageTriggerType; // TODO: 迁移到Skill配置
-                context.DamageDelayTime = damageConfig.DelayTime; // TODO: 迁移到Skill配置
+                context.Data.DamageType = (DamageType)damageConfig.DamageType;
+                context.Data.BaseDamage = damageConfig.BaseDamage;
+                context.Data.Coefficient = (float)damageConfig.Coefficient;
+                context.Data.CanCritical = damageConfig.CanCrit != 0;
+                context.Data.Skill = skill;
+                context.Data.DamageTriggerType = (DamageTriggerType)damageConfig.DamageTriggerType; // TODO: 迁移到Skill配置
+                context.Data.DamageDelayTime = damageConfig.DelayTime; // TODO: 迁移到Skill配置
+                context.Data.TargetMaxHp = targetNumericComponent[NumericType.MaxHp];
+                context.Data.TargetCurrentHp = targetNumericComponent[NumericType.Hp];
 
                 ResolveDamage(attacker, target, context);
             }
-            
+
             buffComp.PublishEvent(new DamageEvent(DamageStage.AfterHit, skillContext));
             ObjectPool.Instance.Recycle(skillContext);
         }
 
         #region Calculate Damage
 
-        public static void ResolveDamage(Unit attacker, Unit target, DamageContext context)
+        public static float ResolveDamage(Unit attacker, Unit target, DamageContext context)
         {
-            if (target == null) return;
-            
-            CalcDamage(attacker, target, context);
-            if (context.IsHandled)
+            if (target == null)
             {
-                ObjectPool.Instance.Recycle(context);
-                return;
+                return 0;
             }
-            
-            switch (context.DamageTriggerType)
+
+            CalcDamage(attacker, target, context);
+            float damage = context.Data.FinalDamage;
+            switch (context.Data.DamageTriggerType)
             {
                 case DamageTriggerType.Immediate:
                     // 瞬时伤害，直接立即执行
                     target.TakeDamage(attacker, context);
+                    damage = context.Data.FinalDamage;
                     ObjectPool.Instance.Recycle(context);
                     break;
                 case DamageTriggerType.Delay:
                     // 延迟伤害，注册定时器到时间后执行
-                    attacker.Root().GetComponent<TimerComponent>().NewOnceTimer(TimeHelper.Now() + context.DamageDelayTime, TimerInvokeType.DelayTakeDamage, context);
+                    attacker.Root().GetComponent<TimerComponent>().NewOnceTimer(TimeHelper.Now() + context.Data.DamageDelayTime, TimerInvokeType.DelayTakeDamage, context);
                     break;
                 case DamageTriggerType.OverTime:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            return damage;
         }
 
         /// <summary>
@@ -112,52 +121,48 @@ namespace ET
             BuffComponent buffComp = attacker.GetComponent<BuffComponent>();
             NumericComponent attackerNumeric = attacker.GetComponent<NumericComponent>();
             // Step 1. 计算原始伤害  Raw Damage = Base + (AD/AP × Ratio) = 技能基础伤害 + 攻击力 * 技能系数
-            if (context.HasStage(DamageStage.BeforeCalcRawDamage))
-            {
-                buffComp.PublishEvent(new DamageEvent(DamageStage.BeforeCalcRawDamage, context));
-                context.FinalDamage = context.RawDamage = CalcRawDamage(attackerNumeric, context.DamageType, context.Coefficient, context.BaseDamage);
-            }
-            
+            // 发布通知，应用buff
+            buffComp.PublishEvent(new DamageEvent(DamageStage.BeforeCalcRawDamage, context));
+            context.Data.FinalDamage = context.Data.RawDamage = CalcRawDamage(attackerNumeric, context.Data.DamageType, context.Data.Coefficient, context.Data.BaseDamage);
+            // 发布通知，修改RawDamage
+            buffComp.PublishEvent(new DamageEvent(DamageStage.ModifyCalcRawDamage, context));
+
             // Step 2. 暴击判定，一般只有普攻和强化普攻有暴击，法术伤害和真伤无暴击。不过这里通过配置控制。
-            if (context.HasStage(DamageStage.GatherCriticalRoll))
+            if (context.Data.CanCritical)
             {
                 float critRate = attackerNumeric.GetAsFloat(NumericType.CritChance); // 暴击率 (0.0 - 1.0)
                 if (RandomGenerator.RandFloat01() < critRate)
                 {
                     // 触发暴击特效
-                    context.IsCritical = true;
-                    context.CriticalMultiplier = Math.Max(1.0f, attackerNumeric.GetAsFloat(NumericType.CritDamagePct));
+                    context.Data.IsCritical = true;
+                    context.Data.CriticalMultiplier = Math.Max(1.0f, attackerNumeric.GetAsFloat(NumericType.CritDamagePct));
                     // 通知修改暴击效果，比如猴子初始暴击效果限定150%，随等级增长
                     buffComp.PublishEvent(new DamageEvent(DamageStage.GatherCriticalRoll, context));
-                    context.FinalDamage *= context.CriticalMultiplier;
+                    context.Data.FinalDamage *= context.Data.CriticalMultiplier;
                 }
             }
 
             // Step 3.0 计算元素伤害。
-            if (context.HasStage(DamageStage.CalcElement))
+            ReactionInfo reactionResult = CalcElementDamage(attacker, target, context.Data.DamageType, context.Data.BaseDamage);
+            if (reactionResult != null)
             {
-                ReactionInfo reactionResult = CalcElementDamage(attacker, target, context.DamageType, context.BaseDamage);
-                if (reactionResult != null)
-                {
-                    context.FinalDamage *= reactionResult.DamageMultiplier;
-                    context.FinalDamage += reactionResult.ExtraDamage;
-                    context.ReactionResult = reactionResult;
-                }
+                context.Data.FinalDamage *= reactionResult.DamageMultiplier;
+                context.Data.FinalDamage += reactionResult.ExtraDamage;
+                context.Data.ReactionResult = reactionResult;
             }
-            
             // 剩余阶段目前都不绕过
 
             // Step 3.1 计算伤害增强，主要用于计算强化普攻额外附加的那段伤害，以及装备法球，在这里并入输出值。注意规则差异：
             //  强化普攻的额外附伤‌：全额加入，但‌不享受暴击‌
             //  装备法球‌（末世破败、闪电匕首电弧、吸血类附伤）：作为‌独立伤害实例‌加入，走同一条后续流程
             buffComp.PublishEvent(new DamageEvent(DamageStage.GatherBonusDamage, context));
-            context.FinalDamage += context.BonusDamage;
+            context.Data.FinalDamage += context.Data.BonusDamage;
 
             //  Step 4. 受害者防御减免计算
             NumericComponent targetNumeric = target.GetComponent<NumericComponent>();
-            context.MitigationMultiplier = CalcDefenseMitigation(attackerNumeric, targetNumeric, context.DamageType);
+            context.Data.MitigationMultiplier = CalcDefenseMitigation(attackerNumeric, targetNumeric, context.Data.DamageType);
             buffComp.PublishEvent(new DamageEvent(DamageStage.GatherDamageMitigation, context));
-            context.FinalDamage *= context.MitigationMultiplier;
+            context.Data.FinalDamage *= context.Data.MitigationMultiplier;
 
             /*  Step 5. 攻击者全局增强 buff
                攻击方所有"造成伤害提升"类效果在此‌线性相加‌成一个系数：
@@ -166,9 +171,9 @@ namespace ET
                破军本质是"‌条件型增伤‌"，也在此处理。社区实测还发现一个异常：破军对‌末世法球‌的加成约为127.8%，而非理论130%，说明装备法球与破军的联动存在小额偏差。
             */
             buffComp.PublishEvent(new DamageEvent(DamageStage.GatherOutgoingDamage, context));
-            context.FinalDamage *= context.AmplifyMultiplier;
+            context.Data.FinalDamage *= context.Data.AmplifyMultiplier;
 
-            context.FinalDamage = Math.Max(context.FinalDamage, 0); // 防止负伤害，即造成回血效果。比如元素克制反而回血，后期打不动。
+            context.Data.FinalDamage = Math.Max(context.Data.FinalDamage, 0); // 防止负伤害，即造成回血效果。比如元素克制反而回血，后期打不动。
         }
 
         /// <summary>
@@ -257,7 +262,7 @@ namespace ET
             关键规则：‌减伤没有上限‌，理论上最多可降低敌人100%输出（专精张飞+项羽实测可达95%）。
             */
             targetBuffComp.PublishEvent(new DamageEvent(DamageStage.GatherIncomingDamage, context));
-            context.FinalDamage *= context.ReduceMultiplier;
+            context.Data.FinalDamage *= context.Data.ReduceMultiplier;
 
             /*Step 7｜受害者免伤触发（名刀、免疫等）
                这一层是"自身减少受到的伤害"，与 Step 6 属于‌不同类‌，因此与 Step 6 是‌相乘‌关系：
@@ -268,18 +273,18 @@ namespace ET
                ‌名刀司命是这一层的特例‌——它不是按百分比减免，而是"致命伤害拦截"：当受到‌致命伤害‌时触发，进入短暂无敌（近战1秒/远程0.5秒）并加30%移速，冷却90秒。它判定的是"这一击是否致死"，因此本质上是在结算最末端的一次"拦截判定"，而不是普通免伤。
             */
             targetBuffComp.PublishEvent(new DamageEvent(DamageStage.JudgeDamageNegation, context));
-            context.FinalDamage *= 1 - context.NegationFactor; // 如纯净苍穹伤害减免
+            context.Data.FinalDamage *= 1 - context.Data.NegationFactor; // 如纯净苍穹伤害减免
 
-            if (context.IsNegated) //触发名刀 或者 净化
+            if (context.Data.IsNegated) //触发名刀 或者 净化
             {
-                context.FinalDamage = 0;
+                context.Data.FinalDamage = 0;
                 return;
             }
 
             //这里的作用是施加元素或者触发扩散等。元素的伤害已经包含在FinalDamage内了。
-            if (DamageTypeHelper.IsElementDamage(context.DamageType) && context.ReactionResult != null)
+            if (DamageTypeHelper.IsElementDamage(context.Data.DamageType) && context.Data.ReactionResult != null)
             {
-                target.GetComponent<ElementalComponent>().ApplyReactionEffects(attacker, context.ReactionResult, context.ReactionResult.CurrentDepth);
+                target.GetComponent<ElementalComponent>().ApplyReactionEffects(attacker, context.Data.ReactionResult, context.Data.ReactionResult.CurrentDepth);
             }
 
             BuffComponent attackerBuffComp = attacker.GetComponent<BuffComponent>();
@@ -289,9 +294,9 @@ namespace ET
             // 扣血处理
             NumericComponent numeric = target.GetComponent<NumericComponent>();
             int oldHp = numeric.GetAsInt(NumericType.Hp);
-            int currentHp = oldHp - (int)context.FinalDamage;
+            int currentHp = oldHp - (int)context.Data.FinalDamage;
 
-            if (context.IsExecuted || currentHp <= 0)
+            if (context.Data.IsExecuted || currentHp <= 0)
             {
                 target.Dead(context);
                 currentHp = 0;
@@ -300,7 +305,7 @@ namespace ET
             // 扣血
             numeric[NumericType.Hp] = currentHp;
             int realDamage = oldHp - currentHp;
-            context.FinalDamage = realDamage;
+            context.Data.FinalDamage = realDamage;
             Log.Info($"[Damage] {target.Id} 受到伤害: {realDamage:F1}, 剩余血量: {currentHp:F1}/{numeric[NumericType.MaxHp]:F1}");
 
             /* Step 9｜吸血装备
@@ -325,7 +330,7 @@ namespace ET
                制裁之刃与梦魇之牙是两件重伤装备（当前版本重伤比例约35%，早期为50%）：
              */
 
-            attacker.Heal(context.LifeStealAmount);
+            attacker.Heal(context.Data.LifeStealAmount);
 
             /* Step 11｜攻击者和受击者被动
 

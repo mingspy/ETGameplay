@@ -36,6 +36,15 @@ namespace ET
         #endregion
     }
 
+    public enum CampType
+    {
+        None = 0,
+        Blue,
+        Red,
+        Ally, // 同盟
+        Enemy // 敌人
+    }
+
     // 运行时技能实例
     [EnableClass]
     public class SkillNode

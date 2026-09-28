@@ -29,49 +29,49 @@ namespace ET
     [EnableMethod]
     public class StateComponent : Entity, IAwake<int>
     {
-        public State State { get; set; }
-        
         /// <summary>
-        /// 英雄ID
+        ///     已激活的被动技能对应的BuffID列表
+        ///     英雄出生时会自动添加这些Buff
+        /// </summary>
+        public List<long> passiveBuffIds;
+
+        /// <summary>
+        ///     自定义被动数据 - 用于存储各英雄被动的专属状态
+        ///     例如：鲁班的被动层数、马超的冷晖枪数量、妲己的层数等
+        ///     Key: 数据名, Value: 数据值
+        /// </summary>
+        public Dictionary<string, object> passiveData;
+
+        public State State { get; set; }
+
+        /// <summary>
+        ///     英雄ID
         /// </summary>
         public int HeroConfigId { get; set; }
 
         /// <summary>
-        /// 被动技能是否已初始化
+        ///     被动技能是否已初始化
         /// </summary>
-        public bool IsInited{ get; set; }
+        public bool IsInited { get; set; }
 
         /// <summary>
-        /// 被动技能等级
+        ///     被动技能等级
         /// </summary>
-        public int PassiveLevel{ get; set; }
-
-        /// <summary>
-        /// 自定义被动数据 - 用于存储各英雄被动的专属状态
-        /// 例如：鲁班的被动层数、马超的冷晖枪数量、妲己的层数等
-        /// Key: 数据名, Value: 数据值
-        /// </summary>
-        public Dictionary<string, object> passiveData;
+        public int PassiveLevel { get; set; }
 
         public Dictionary<string, object> PassiveData
         {
             get
             {
-                return passiveData??= ObjectPool.Instance.Fetch<Dictionary<string, object>>();
+                return this.passiveData ??= ObjectPool.Instance.Fetch<Dictionary<string, object>>();
             }
         }
-        
-        /// <summary>
-        /// 已激活的被动技能对应的BuffID列表
-        /// 英雄出生时会自动添加这些Buff
-        /// </summary>
-        public List<long> passiveBuffIds;
 
         public List<long> PassiveBuffIds
         {
             get
             {
-                return passiveBuffIds??= ObjectPool.Instance.Fetch<List<long>>();
+                return this.passiveBuffIds ??= ObjectPool.Instance.Fetch<List<long>>();
             }
         }
 
@@ -90,7 +90,7 @@ namespace ET
                 ObjectPool.Instance.Recycle(this.passiveData);
                 this.passiveData = null;
             }
-            
+
             if (this.passiveBuffIds != null)
             {
                 this.passiveBuffIds.Clear();

@@ -7,49 +7,6 @@
     /// </summary>
     public static class NumericType
     {
-        private const int _Base = 1;
-        private const int _Add = 2;
-        private const int _Pct = 3;
-        private const int _FinalAdd = 4;
-        private const int _FinalPct = 5;
-        
-
-        /// <summary>
-        ///     numeric 的基数索引，比如Hp的基数 = Hp * 10 + 1
-        /// </summary>
-        /// <param name="numeric"></param>
-        /// <returns></returns>
-        public static int Base(int numeric)
-        {
-            return numeric * 10 + _Base;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="numeric"></param>
-        /// <returns></returns>
-        public static int Add(int numeric)
-        {
-            return numeric * 10 + _Add;
-        }
-
-        public static int Pct(int numeric)
-        {
-            return numeric * 10 + _Pct;
-        }
-
-        public static int FinalAdd(int numeric)
-        {
-            return numeric * 10 + _FinalAdd;
-        }
-
-        public static int FinalPct(int numeric)
-        {
-            return numeric * 10 + _FinalPct;
-        }
-
-
-
         //小于此值的都被认为是原始属性
         public const int Max = 10000;
         public const int AOI = 9999;
@@ -71,6 +28,11 @@
 
         //攻击距离
         public const int AttackRange = 1005;
+        
+        /// <summary>
+        /// 精准值，用于强化普攻的加成
+        /// </summary>
+        public const int Precision = 1006;
 
         #region 伤害 (int 类型)
 
@@ -243,6 +205,7 @@
         /// 全局治疗减益, 如制裁
         /// </summary>
         public const int HealReduction = 1508;
+        
 
         // Experience Points
         public const int EXP = 1998;

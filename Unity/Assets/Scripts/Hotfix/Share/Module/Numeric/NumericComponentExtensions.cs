@@ -8,8 +8,8 @@ namespace ET
     {
         public static void InitBaseAttributes(this NumericComponent self, int heroConfigId, int level)
         {
-            // 示例：基础属性，实际项目读配置表 需要根据英雄configId，获取
-            // 这里以一个典型射手为例
+            // 示例：基础属性，TODO: 实际项目读配置表 需要根据英雄configId，获取
+            // 这里以一个典型射手为例 
             self[NumericType.MaxHp] = 3000 + level * 200;
             self[NumericType.Attack] = 170 + level * 10;
             self[NumericType.Magic] = 0;

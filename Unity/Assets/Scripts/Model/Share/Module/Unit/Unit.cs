@@ -53,5 +53,18 @@ namespace ET
                 return $"{this.GetType().FullName} ({this.Id})";
             }
         }
+        
+        [BsonElement]
+        private CampType camp;
+        
+        [BsonIgnore]
+        public CampType Camp
+        {
+            get => this.camp;
+            set
+            {
+                this.camp = value;
+            }
+        }
     }
 }

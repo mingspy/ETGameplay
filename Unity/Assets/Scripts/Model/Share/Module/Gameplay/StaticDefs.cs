@@ -16,17 +16,16 @@ namespace ET
         public const int Equipment_Zhicai_Passive = 20003; // 制裁之刃-重伤
         public const int Equipment_Pojun_Passive = 20004; // 破军-破军
     }
-    
+
     /// <summary>
-    /// 英雄ID常量
+    ///     英雄ID常量
     /// </summary>
     public static class HeroId
     {
-        public const int Lubanqihao = 101;  // 鲁班七号
-        public const int Machao = 102;      // 马超
-        public const int Daji = 103;        // 妲己
+        public const int Lubanqihao = 101; // 鲁班七号
+        public const int Machao = 102; // 马超
+        public const int Daji = 103; // 妲己
     }
-    
 
     public static class SkillDefs
     {

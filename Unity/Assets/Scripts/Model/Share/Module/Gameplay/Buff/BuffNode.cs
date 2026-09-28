@@ -11,14 +11,10 @@ namespace ET
     public class BuffNode : Entity, IAwake
     {
         /// <summary>
-        ///     Buff显示名称
+        ///     属性修改器列表 - AttributeModifier类型使用
+        ///     Key: 属性类型, Value: 修改值（可以是绝对值或百分比）
         /// </summary>
-        public string Name;
-
-        /// <summary>
-        ///     Buff类型
-        /// </summary>
-        public BuffType Type;
+        public Dictionary<int, int> AttributeModifiers;
 
         /// <summary>
         ///     Buff配置ID
@@ -99,10 +95,9 @@ namespace ET
         public int MaxStack = 1;
 
         /// <summary>
-        ///     属性修改器列表 - AttributeModifier类型使用
-        ///     Key: 属性类型, Value: 修改值（可以是绝对值或百分比）
+        ///     Buff显示名称
         /// </summary>
-        public Dictionary<int, int> AttributeModifiers;
+        public string Name;
 
         /// <summary>
         ///     Buff来源实体ID（施放者、装备ID等）
@@ -123,6 +118,11 @@ namespace ET
         ///     目标实体ID
         /// </summary>
         public long TargetId;
+
+        /// <summary>
+        ///     Buff类型
+        /// </summary>
+        public BuffType Type;
 
         public override void Dispose()
         {

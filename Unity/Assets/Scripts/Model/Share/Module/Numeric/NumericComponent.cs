@@ -7,6 +7,42 @@ namespace ET
     [FriendOf(typeof (NumericComponent))]
     public static class NumericComponentSystem
     {
+        private const int _Base = 1;
+        private const int _Add = 2;
+        private const int _Pct = 3;
+        private const int _FinalAdd = 4;
+        private const int _FinalPct = 5;
+        
+
+        /// <summary>
+        ///     numeric 的基数索引，比如Hp的基数 = Hp * 10 + 1
+        /// </summary>
+        public static int AttributeBase(this NumericComponent self,int numeric)
+        {
+            return numeric * 10 + _Base;
+        }
+
+
+        public static int AttributeAdd(this NumericComponent self, int numeric)
+        {
+            return numeric * 10 + _Add;
+        }
+
+        public static int AttributePct(this NumericComponent self,int numeric)
+        {
+            return numeric * 10 + _Pct;
+        }
+
+        public static int AttributeFinalAdd(this NumericComponent self,int numeric)
+        {
+            return numeric * 10 + _FinalAdd;
+        }
+
+        public static int AttributeFinalPct(this NumericComponent self,int numeric)
+        {
+            return numeric * 10 + _FinalPct;
+        }
+        
         public static float GetAsFloat(this NumericComponent self, int numericType)
         {
             return NumericComponent.ValueAsFloat(self.GetByKey(numericType));

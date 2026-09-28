@@ -88,7 +88,7 @@ namespace ET
 
         #endregion
 
-        #region BuffNode Manage 
+        #region BuffNode Manage
 
         /// <summary>
         ///     添加Buff - 核心入口方法

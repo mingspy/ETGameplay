@@ -170,7 +170,7 @@ namespace ET
             if (this.BuffHandlersById.TryGetValue(buffNode.HandlerId, out IBuffHandler aHandler))
             {
                 await aHandler.OnEvent(buffComponent, buffNode, eventData);
-                eventData.Context.IsHandled = eventData.IsHandled;
+                eventData.Context.Data.IsHandled = eventData.IsHandled;
                 return;
             }
 
@@ -186,7 +186,7 @@ namespace ET
                     await handler.OnEvent(buffComponent, buffNode, eventData);
                     if (eventData.IsHandled)
                     {
-                        eventData.Context.IsHandled = true;
+                        eventData.Context.Data.IsHandled = true;
                         return;
                     }
                 }
