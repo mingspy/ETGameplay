@@ -174,14 +174,15 @@ namespace ET.Module.Gameplay.Passive
                         // 强化普攻
                         if (isEnhanced)
                         {
-                            // 1. 拦截原普攻，阻止默认普攻伤害落地
+                            // 1. 拦截原普攻，阻止默认普攻伤害落地。
+                            // TODO: 这种拦截设计不合理，应该由【逻辑动画事件】触发三次扫射。计算伤害应该是线性的，简单计算，而不是业务逻辑。
                             eventData.IsHandled = true;
 
                             // 2. 获取扇形范围内所有敌对单位（AOE判定）
                             var targets = BattleHelper.GetUnitsInSector(owner.Position, owner.Forward, SECTOR_RANGE, SECTOR_ANGLE, owner.Camp, CampType.Enemy);
                             // 3. 对每个目标发射3段独立伤害（每段单独走管线）
                             //    注：实际项目应根据攻速档位添加段间延迟，支持移动/技能打断，示例简化为瞬发
-                            //  TODO: 分成三段触发，而不是立刻执行；采用定时器完成，并判断是否取消技能（移动或者被打断)
+                            //  TODO: 分成三段触发，而不是立刻执行；这里只是简化实现，为了验证BUFF的事件系统。
                             for (int seg = 0; seg < BURST_SEGMENT_COUNT; seg++)
                             {
                                 foreach (Unit target in targets)
