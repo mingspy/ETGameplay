@@ -29,9 +29,9 @@ namespace ET
             NumericComponent numeric = self.GetParent<Unit>().GetComponent<NumericComponent>();
 
             // 叠加所有装备的基础属性
-            for (int i = 0; i < config.Numerics.Length; i++)
+            for (int i = 0; i < config.Attributes.Length; i++)
             {
-                numeric[config.Numerics[i]] += config.NumericValues[i];
+                numeric[config.Attributes[i]] += config.AttributeValues[i];
             }
 
             // TODO: 实现附加效果Buff，根据Buff类型，添加监听器。
@@ -52,9 +52,9 @@ namespace ET
                 NumericComponent numeric = self.GetParent<Unit>().GetComponent<NumericComponent>();
 
                 // 叠加所有装备的基础属性
-                for (int i = 0; i < config.Numerics.Length; i++)
+                for (int i = 0; i < config.Attributes.Length; i++)
                 {
-                    numeric[config.Numerics[i]] -= config.NumericValues[i];
+                    numeric[config.Attributes[i]] -= config.AttributeValues[i];
                 }
 
                 BuffComponent buffComponent = self.GetParent<Unit>().GetComponent<BuffComponent>();

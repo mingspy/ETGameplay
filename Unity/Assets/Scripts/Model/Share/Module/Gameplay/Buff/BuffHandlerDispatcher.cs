@@ -165,12 +165,11 @@ namespace ET
             }
         }
 
-        public async ETTask DispatchBuffEvent<T>(BuffComponent buffComponent, BuffNode buffNode, T eventData) where T : IDamageEvent
+        public async ETTask DispatchBuffEvent<T>(BuffComponent buffComponent, BuffNode buffNode,  T eventData) where T : IDamageEvent
         {
             if (this.BuffHandlersById.TryGetValue(buffNode.HandlerId, out IBuffHandler aHandler))
             {
-                await aHandler.OnEvent(buffComponent, buffNode, eventData);
-                eventData.Context.Data.IsHandled = eventData.IsHandled;
+                await aHandler.OnEvent(buffComponent, buffNode,  eventData);
                 return;
             }
 
@@ -183,12 +182,7 @@ namespace ET
             {
                 try
                 {
-                    await handler.OnEvent(buffComponent, buffNode, eventData);
-                    if (eventData.IsHandled)
-                    {
-                        eventData.Context.Data.IsHandled = true;
-                        return;
-                    }
+                    await handler.OnEvent(buffComponent, buffNode,  eventData);
                 }
                 catch (Exception e)
                 {

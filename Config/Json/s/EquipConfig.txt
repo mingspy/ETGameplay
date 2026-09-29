@@ -1,9 +1,9 @@
 {"dict": [
-[1, {"_t":"EquipConfig","_id":1,"Name":"鞋子","Description":"鞋子","EquipType":1,"Slot":1,"Numerics":[2001],"NumericValues":[100],"BuffIds":[]}],
-[2, {"_t":"EquipConfig","_id":2,"Name":"帽子","Description":"帽子","EquipType":2,"Slot":2,"Numerics":[2002],"NumericValues":[100],"BuffIds":[]}],
-[3, {"_t":"EquipConfig","_id":3,"Name":"武器","Description":"武器","EquipType":3,"Slot":3,"Numerics":[2001],"NumericValues":[50],"BuffIds":[]}],
-[4, {"_t":"EquipConfig","_id":4,"Name":"项链","Description":"项链","EquipType":4,"Slot":4,"Numerics":[2001],"NumericValues":[100],"BuffIds":[]}],
-[5, {"_t":"EquipConfig","_id":5,"Name":"戒指","Description":"戒指","EquipType":5,"Slot":5,"Numerics":[2002],"NumericValues":[100],"BuffIds":[]}],
-[6, {"_t":"EquipConfig","_id":6,"Name":"上衣","Description":"上衣","EquipType":6,"Slot":6,"Numerics":[2001],"NumericValues":[50],"BuffIds":[]}],
-[7, {"_t":"EquipConfig","_id":7,"Name":"裤子","Description":"裤子","EquipType":7,"Slot":7,"Numerics":[2001],"NumericValues":[50],"BuffIds":[]}]
+[1, {"_t":"EquipConfig","_id":1,"Name":"鞋子","Description":"鞋子","EquipType":1,"Slot":1,"Attributes":[2001],"AttributeValues":[100],"BuffIds":[]}],
+[2, {"_t":"EquipConfig","_id":2,"Name":"帽子","Description":"帽子","EquipType":2,"Slot":2,"Attributes":[2002],"AttributeValues":[100],"BuffIds":[]}],
+[3, {"_t":"EquipConfig","_id":3,"Name":"武器","Description":"武器","EquipType":3,"Slot":3,"Attributes":[2001],"AttributeValues":[50],"BuffIds":[]}],
+[4, {"_t":"EquipConfig","_id":4,"Name":"项链","Description":"项链","EquipType":4,"Slot":4,"Attributes":[2001],"AttributeValues":[100],"BuffIds":[]}],
+[5, {"_t":"EquipConfig","_id":5,"Name":"戒指","Description":"戒指","EquipType":5,"Slot":5,"Attributes":[2002],"AttributeValues":[100],"BuffIds":[]}],
+[6, {"_t":"EquipConfig","_id":6,"Name":"上衣","Description":"上衣","EquipType":6,"Slot":6,"Attributes":[2001],"AttributeValues":[50],"BuffIds":[]}],
+[7, {"_t":"EquipConfig","_id":7,"Name":"裤子","Description":"裤子","EquipType":7,"Slot":7,"Attributes":[2001],"AttributeValues":[50],"BuffIds":[]}]
 ]}

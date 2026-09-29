@@ -26,7 +26,7 @@ namespace ET
         ETTask OnAdd(BuffComponent self, BuffNode buffNode);
         ETTask OnRemove(BuffComponent self, BuffNode buffNode);
         ETTask OnIntervalTick(BuffComponent self, BuffNode buffNode);
-        ETTask OnEvent<T>(BuffComponent self, BuffNode buffNode, T eventData) where T : IDamageEvent;
+        ETTask OnEvent<T>(BuffComponent self, BuffNode buffNode,  T eventData) where T : IDamageEvent;
     }
 
     /// <summary>

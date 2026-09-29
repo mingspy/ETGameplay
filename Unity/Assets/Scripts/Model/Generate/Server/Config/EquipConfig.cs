@@ -70,9 +70,9 @@ namespace ET
 		/// <summary>槽位</summary>
 		public int Slot { get; set; }
 		/// <summary>修改的属性</summary>
-		public int[] Numerics { get; set; }
+		public int[] Attributes { get; set; }
 		/// <summary>效果数值, int 属性等于原来值，float 值 * 10000</summary>
-		public int[] NumericValues { get; set; }
+		public int[] AttributeValues { get; set; }
 		/// <summary>装备的附加效果，如减速，元素</summary>
 		public int[] BuffIds { get; set; }
 

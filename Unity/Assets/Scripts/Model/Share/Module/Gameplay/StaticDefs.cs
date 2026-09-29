@@ -1,7 +1,7 @@
 namespace ET
 {
     /// <summary>
-    ///     Buff配置ID常量定义
+    ///     Buff配置ID常量定义，【注意这里为Demo，Demo buff系统的实现逻辑】
     /// </summary>
     public static class BuffConfigId
     {

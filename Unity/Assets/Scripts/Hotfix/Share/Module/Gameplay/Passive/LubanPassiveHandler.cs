@@ -46,7 +46,7 @@ namespace ET.Module.Gameplay.Passive
         public override async ETTask OnAdd(BuffComponent self, BuffNode buffNode)
         {
             buffNode.Name = "火力压制";
-            buffNode.Type = BuffType.EventTrigger;
+            buffNode.Type = BuffType.Passive;
             buffNode.IsDispellable = false; // 英雄被动不能被驱散
             buffNode.Tags.Add("passive");
             buffNode.Tags.Add("luban");
@@ -176,7 +176,7 @@ namespace ET.Module.Gameplay.Passive
                         {
                             // 1. 拦截原普攻，阻止默认普攻伤害落地。
                             // TODO: 这种拦截设计不合理，应该由【逻辑动画事件】触发三次扫射。计算伤害应该是线性的，简单计算，而不是业务逻辑。
-                            eventData.IsHandled = true;
+                            context.Data.IsHandled = true;
 
                             // 2. 获取扇形范围内所有敌对单位（AOE判定）
                             var targets = BattleHelper.GetUnitsInSector(owner.Position, owner.Forward, SECTOR_RANGE, SECTOR_ANGLE, owner.Camp, CampType.Enemy);

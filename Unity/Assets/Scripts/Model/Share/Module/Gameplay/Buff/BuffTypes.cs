@@ -18,7 +18,7 @@ namespace ET
         AttributeModifer = 1 << 7,
 
         /// <summary>
-        ///     持续时间型 - 有持续时间，到期自动移除
+        ///     持续时间型 - 有持续时间，到期自动移除，如果buff的持续时间设置成0，则是永久buff。
         ///     例如：妲己被动法术穿透叠加、马超拾取冷晖枪后的增益
         /// </summary>
         Duration = 1 << 8,
@@ -40,6 +40,7 @@ namespace ET
         ///     例如：鲁班普攻叠被动层数、普攻命中触发装备被动
         /// </summary>
         EventTrigger = 1 << 10,
+        Passive = Duration|EventTrigger,
 
         /// <summary>
         ///     条件状态型 - 满足特定条件时生效，条件不满足自动失效

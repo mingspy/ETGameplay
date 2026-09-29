@@ -51,19 +51,23 @@ namespace ET
     public enum DamageTriggerType
     {
         /// <summary>
+        /// 未设置，使用SkillConfig默认的设置。设置下面的值时，使用SkillDamageConfig覆盖。
+        /// </summary>
+        None = 0,
+        /// <summary>
         ///     瞬时伤害
         /// </summary>
-        Immediate = 0,
+        Immediate = 1,
 
         /// <summary>
         ///     延迟伤害
         /// </summary>
-        Delay = 1,
+        Delay = 2,
 
         /// <summary>
         ///     每帧都执行，持续伤害
         /// </summary>
-        OverTime = 2
+        OverTime = 3
     }
 
     public enum SkillType
@@ -188,7 +192,6 @@ namespace ET
     {
         public DamageStage Stage { get; }
         public DamageContext Context { get; }
-        public bool IsHandled { get; set; }
     }
 
     /// <summary>
@@ -199,8 +202,6 @@ namespace ET
     {
         public DamageStage Stage { get; }
         public DamageContext Context { get; }
-
-        public bool IsHandled { get; set; }
 
         public DamageEvent(DamageStage stage, DamageContext context)
         {

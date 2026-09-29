@@ -40,6 +40,8 @@ namespace ET
             DamageContext skillContext = ObjectPool.Instance.Fetch<DamageContext>();
             skillContext.Data.Skill = skill;
             buffComp.PublishEvent(new DamageEvent(DamageStage.BeforeHit, skillContext));
+            
+            // TODO: 这里的拦截设计不合理，需要改掉。比如鲁班的被动拦截，应该由【逻辑动画事件】触发三次扫射。计算伤害应该是线性的，简单计算，而不是业务逻辑
             if (skillContext.Data.IsHandled) // 比如鲁班的强化普攻，会拦截本次计算，改成三段普攻
             {
                 ObjectPool.Instance.Recycle(skillContext);
@@ -49,24 +51,28 @@ namespace ET
             foreach (SkillDamageConfig damageConfig in skill.Damages)
             {
                 DamageContext context = ObjectPool.Instance.Fetch<DamageContext>();
-                context.Reset();
-                context.Source = attacker;
-                context.Target = target;
-                context.Data.DamageType = (DamageType)damageConfig.DamageType;
-                context.Data.BaseDamage = damageConfig.BaseDamage;
-                context.Data.Coefficient = (float)damageConfig.Coefficient;
-                context.Data.CanCritical = damageConfig.CanCrit != 0;
-                context.Data.Skill = skill;
-                context.Data.DamageTriggerType = (DamageTriggerType)damageConfig.DamageTriggerType; // TODO: 迁移到Skill配置
-                context.Data.DamageDelayTime = damageConfig.DelayTime; // TODO: 迁移到Skill配置
-                context.Data.TargetMaxHp = targetNumericComponent[NumericType.MaxHp];
-                context.Data.TargetCurrentHp = targetNumericComponent[NumericType.Hp];
-
+                SetupContext(context, attacker, target, skill, damageConfig, targetNumericComponent);
                 ResolveDamage(attacker, target, context);
             }
 
             buffComp.PublishEvent(new DamageEvent(DamageStage.AfterHit, skillContext));
             ObjectPool.Instance.Recycle(skillContext);
+        }
+
+        private static void SetupContext(DamageContext context, Unit attacker, Unit target, SkillNode skill,  SkillDamageConfig damageConfig, NumericComponent targetNumericComponent)
+        {
+            context.Reset();
+            context.Source = attacker;
+            context.Target = target;
+            context.Data.DamageType = (DamageType)damageConfig.DamageType;
+            context.Data.BaseDamage = damageConfig.BaseDamage;
+            context.Data.Coefficient = (float)damageConfig.Coefficient;
+            context.Data.CanCritical = damageConfig.CanCrit != 0;
+            context.Data.Skill = skill;
+            context.Data.DamageTriggerType = (DamageTriggerType)damageConfig.DamageTriggerType; // TODO: 迁移到Skill配置
+            context.Data.DamageDelayTime = damageConfig.DelayTime; // TODO: 迁移到Skill配置
+            context.Data.TargetMaxHp = targetNumericComponent[NumericType.MaxHp];
+            context.Data.TargetCurrentHp = targetNumericComponent[NumericType.Hp];
         }
 
         #region Calculate Damage
@@ -75,6 +81,7 @@ namespace ET
         {
             if (target == null)
             {
+                ObjectPool.Instance.Recycle(context);
                 return 0;
             }
 

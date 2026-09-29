@@ -65,7 +65,7 @@ namespace ET
 		public string Name { get; set; }
 		/// <summary>描述</summary>
 		public string Description { get; set; }
-		/// <summary>Type</summary>
+		/// <summary>BuffType</summary>
 		public int BuffType { get; set; }
 		/// <summary>BuffHandler处理器ID</summary>
 		public int HandlerId { get; set; }
@@ -83,7 +83,7 @@ namespace ET
 		public int[] Attributes { get; set; }
 		/// <summary>修改的值, int 属性设置成原来值；float 值需要 * 10000，比如0.5，这里设置成5000</summary>
 		public int[] AttributeValues { get; set; }
-		/// <summary>监听的事件id</summary>
+		/// <summary>监听的DamageStage事件</summary>
 		public int[] ListenEvents { get; set; }
 		/// <summary>附加数据</summary>
 		public string CustomData { get; set; }
